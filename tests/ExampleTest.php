@@ -1,6 +1,6 @@
 <?php
 
-namespace saefy\quars;
+namespace Saefy\Quars\Tests;
 
 class ExampleTest extends \PHPUnit\Framework\TestCase
 {
@@ -9,6 +9,15 @@ class ExampleTest extends \PHPUnit\Framework\TestCase
      */
     public function testTrueIsTrue()
     {
+    	$Qs = new \saefy\quars\Quars();
         $this->assertTrue(true);
+    }
+
+    public function testQuarsOkay()
+    {
+    	$Q = new \saefy\quars\Quars();
+        $this->assertTrue(true);
+        $this->assertEquals($Q->okay(),'okay executed');
+        $this->assertEquals($Q->okay(),'okay executed');
     }
 }

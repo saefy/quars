@@ -25,12 +25,12 @@
     },
     "autoload": {
         "psr-4": {
-            "saefy\\quars\\": "src"
+            "Saefy\\Quars\\": "src"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "saefy\\quars\\": "tests"
+            "Saefy\\Quars\\": "tests"
         }
     },
     "scripts": {
