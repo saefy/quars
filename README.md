@@ -7,10 +7,10 @@
 [![Quality Score][ico-code-quality]][link-code-quality]
 [![Total Downloads][ico-downloads]][link-downloads]
 
-Quars is a PHP Framework, easy to install. Uses Phroutes/phroutes for routing and Bladex an extended of blade template engine used in Laravel.
+Quars is a PHP Framework for small projects, easy to implement. It uses Phroutes/phroutes for routing, blade template engine used in Laravel.
 
 - Database is handled with \Quars\Db\Db
-- ActiveRecord library is \Quara\ActiveRecord
+- ActiveRecord library is \Quars\ActiveRecord
 
 ## Structure
 
@@ -18,19 +18,19 @@ This is the directory structure you should use for your project.
 
 ```
 my_application_example/
-	app/
-		Cache/
-		Config/
-		Controllers/
-		Errors/
-		Helpers/
-		Libraries/
-		Models/
-		Routes/
-		Services/
-		Views/
-	boostrap/
-	public/
+  app/
+    Cache/
+    Config/
+    Controllers/
+    Errors/
+    Helpers/
+    Libraries/
+    Models/
+    Routes/
+    Services/
+    Views/
+    boostrap/
+    public/
 vendor/
 ```
 
@@ -41,21 +41,18 @@ Via Composer
 
 ``` bash
 $ composer require saefy/quars
-
-Currently is in dev version
-$ composer require saefy/quars:dev-master
 ```
 
 ## Usage
 
-This is the main framework source code should be installed ussing composer please refer to saefy/quars-aplication to get all folder structure for your project.
+This is the main framework source code should be installed ussing composer, please refer to saefy/quars-aplication to get all folder structure for your project.
 
-After having all code structure run: 
+After having all code structure run:
 ```
 composer install
 sh quars_serve application_example
 ```
-Note: quars_serve is for dev purposes only don't use it in prod environments.
+Note: quars_serve is for dev purposes only, don't use it in prod environments.
 
 ``` php
 // Run the app
