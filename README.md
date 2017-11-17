@@ -1,4 +1,4 @@
-# quars
+# quars (Framework Core)
 
 [![Latest Version on Packagist][ico-version]][link-packagist]
 [![Software License][ico-license]](LICENSE.md)
@@ -6,6 +6,8 @@
 [![Coverage Status][ico-scrutinizer]][link-scrutinizer]
 [![Quality Score][ico-code-quality]][link-code-quality]
 [![Total Downloads][ico-downloads]][link-downloads]
+
+This is the Quars Framework Core, please use [saefy/quars-application](https://github.com/saefy/quars-application/) to create web apps with Quars.
 
 Quars is a PHP Framework for small projects, easy to implement. It uses Phroutes/phroutes for routing, blade template engine used in Laravel.
 
