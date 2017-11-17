@@ -7,18 +7,30 @@
 [![Quality Score][ico-code-quality]][link-code-quality]
 [![Total Downloads][ico-downloads]][link-downloads]
 
-This is where your description should go. Try and limit it to a paragraph or two, and maybe throw in a mention of what
-PSRs you support to avoid any confusion with users and contributors.
+Quars is a PHP Framework, easy to install. Uses Phroutes/phroutes for routing and Bladex an extended of blade template engine used in Laravel.
+
+- Database is handled with \Quars\Db\Db
+- ActiveRecord library is \Quara\ActiveRecord
 
 ## Structure
 
-If any of the following are applicable to your project, then the directory structure should follow industry best practises by being named the following.
+This is the directory structure you should use for your project. 
 
 ```
-bin/        
-config/
-src/
-tests/
+my_application_example/
+	app/
+		Cache/
+		Config/
+		Controllers/
+		Errors/
+		Helpers/
+		Libraries/
+		Models/
+		Routes/
+		Services/
+		Views/
+	boostrap/
+	public/
 vendor/
 ```
 
@@ -30,15 +42,24 @@ Via Composer
 ``` bash
 $ composer require saefy/quars
 
-Current dev version 
+Currently is in dev version
 $ composer require saefy/quars:dev-master
 ```
 
 ## Usage
 
+This is the main framework source code should be installed ussing composer please refer to saefy/quars-aplication to get all folder structure for your project.
+
+After having all code structure run: 
+```
+composer install
+sh quars_serve application_example
+```
+Note: quars_serve is for dev purposes only don't use it in prod environments.
+
 ``` php
-$skeleton = new saefy\quars();
-echo $skeleton->echoPhrase('Hello, League!');
+// Run the app
+\Quars\Request::serve();
 ```
 
 ## Change log
