@@ -1,4 +1,4 @@
-# quars (Framework Core)
+# Quars (Framework Core)
 
 [![Latest Version on Packagist][ico-version]][link-packagist]
 [![Software License][ico-license]](LICENSE.md)
