@@ -29,10 +29,10 @@ class Load{
 		$this -> ReturnResult = $ReturnResult;
 
 		$view_file = 'app/Views/'.$view;
-		$view_file_path = SYSTEM_PATH.$view_file;
+		$view_file_path = SYSTEM_PATH_QRS.$view_file;
 		$view_exist = false;
-
-		if( fk_file_exists($view_file) ){ $view_exist = true; }
+		
+		if( file_exists($view_file_path) ){ $view_exist = true; }
 
 		if($view_exist==FALSE){
 			//view no existe
@@ -296,7 +296,7 @@ Este es el archivo '.$view_file.'
 
 			if($return==true){ ob_start(); }
 			
-			// require_once (SYSTEM_PATH.'App/Controllers/'.$url_rs['file_controller']);
+			// require_once (SYSTEM_PATH_QRS.'App/Controllers/'.$url_rs['file_controller']);
 			$controller  = '\\App\\Controllers\\'.$url_rs['controller'];
 			$page = new $controller($url_rs);
 

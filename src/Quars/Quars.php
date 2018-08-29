@@ -29,7 +29,7 @@ class Quars {
 
 		$x_r=explode('/',$p_rute);
 		$num_dirs=count($x_r);
-		$dir = trim(SYSTEM_PATH.$p_rute,'*');
+		$dir = trim(SYSTEM_PATH_QRS.$p_rute,'*');
 
 		if($x_r[$num_dirs-1]!="*"){
 			// un solo archivos
@@ -65,7 +65,7 @@ class Quars {
 			}
 			while ($file = readdir($reader)){
 
-				if(!is_dir(SYSTEM_PATH.$file)){
+				if(!is_dir(SYSTEM_PATH_QRS.$file)){
 
 					if($end != ''){
 						// con terminacion
@@ -149,7 +149,7 @@ class Quars {
 	public static function GetResource($Resource,$Type){
 		$Resource = decode($Resource);
 
-		$fileName = SYSTEM_PATH.$Resource;
+		$fileName = SYSTEM_PATH_QRS.$Resource;
 		// Reject if is not  .js o .css file
 		$ext=self::file_ext($fileName);
 		if($ext=='js' || $ext == 'css'){
@@ -194,11 +194,10 @@ class Quars {
 			$path = fk_get_path();
 		}
 
-		$url_rs=self::url_processor($path);
+		$url_rs = self::url_processor($path);
 		
 		$controller_exist = false;
-		if( file_exists(SYSTEM_PATH.'app/controllers/'.$url_rs['file_controller']) ){ $controller_exist = true; }
-
+		if( file_exists(SYSTEM_PATH_QRS.'app/Controllers/'.$url_rs['file_controller']) ){ $controller_exist = true; }
 
 		if($controller_exist==true){
 			// controler existe
@@ -206,10 +205,11 @@ class Quars {
 			// view existe
 			//EJECUTAR CONTROLLER
 
-			// require(SYSTEM_PATH.'app/controllers/'.$url_rs['file_controller']);
-			$url_rs['controller'] = '\\App\\Controllers\\'.$url_rs['controller'];
+			require(SYSTEM_PATH_QRS.'app/Controllers/'.$url_rs['file_controller']);
+
+			$controller_class = '\\App\\Controllers\\'.$url_rs['controller'];
 			//EJECUTAR CONTROLLER
-			$page = new $url_rs['controller']($url_rs);
+			$page = new $controller_class($url_rs);
 
 		}else{
 			// controler no existe
@@ -236,8 +236,8 @@ class Quars {
 				}
 
 			}else{
-				if(file_exists(SYSTEM_PATH.'app/Errors/404.php')){
-					require(SYSTEM_PATH.'app/Errors/404.php');
+				if(file_exists(SYSTEM_PATH_QRS.'app/Errors/404.php')){
+					require(SYSTEM_PATH_QRS.'app/Errors/404.php');
 				}else{
 					require(dirname(__FILE__).'/Messages/Page/404.php');
 				}
@@ -249,7 +249,7 @@ class Quars {
 	public static function url_processor($url){
 
 		$file_lst = array();
-
+		echo $GLOBALS['QRS']['config']['APP']['mod_rewrite'];
 		if($GLOBALS['QRS']['config']['APP']['mod_rewrite']){
 			//----------------
 			//MOD REWRITE TRUE
@@ -441,11 +441,11 @@ class Quars {
 		$GLOBALS['QRS']['RUNNING']['db'] = $arr_env;
 
 		// define  database vars
-		define('HOST',$arr_env['db_host']);
-		define('USER',$arr_env['db_username']);
-		define('PASSWORD',$arr_env['db_password']);
-		define('SYSTEM_DB',$arr_env['db_name']);
-		define('DB_TYPE',$arr_env['db_type']);
+		fk_define('HOST',$arr_env['db_host']);
+		fk_define('USER',$arr_env['db_username']);
+		fk_define('PASSWORD',$arr_env['db_password']);
+		fk_define('SYSTEM_DB',$arr_env['db_name']);
+		fk_define('DB_TYPE',$arr_env['db_type']);
 		// Inicializar JS links, Css links
 		$GLOBALS['QRS']['js_links'] = '';
 		$GLOBALS['QRS']['css_links'] = '';
@@ -465,7 +465,7 @@ class Quars {
 	private static function read_config_file($FILE){
 
 		//
-		$cnf = include(SYSTEM_PATH.'app/config/'.$FILE.'.php');
+		$cnf = include(SYSTEM_PATH_QRS.'app/config/'.$FILE.'.php');
 		$GLOBALS['QRS'][$FILE] = $cnf;
 		/*
 		$subsection = false;

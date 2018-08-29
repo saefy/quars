@@ -29,8 +29,8 @@ class QrsException extends \Exception {
 
 		// Mensaje amigable en caso que no este activo el interactive
 		if(@$GLOBALS['QRS']['RUNNING']['app']['interactive']!=TRUE){
-			if(file_exists(SYSTEM_PATH.'app/errors/error_general.php')){
-				$tpl_exception = SYSTEM_PATH.'app/errors/error_general.php';
+			if(file_exists(SYSTEM_PATH_QRS.'app/errors/error_general.php')){
+				$tpl_exception = SYSTEM_PATH_QRS.'app/errors/error_general.php';
 			}else{
 				$tpl_exception = dirname(__FILE__) . '/Messages/Page/default_error_general.php';
 			}
@@ -58,7 +58,7 @@ class QrsException extends \Exception {
 		$msg = $this->getMessage();
 
 		if(php_sapi_name() != "cli" && class_exists('Logger')){
-			$Log = Logger::getRootLogger();
+			$Log = \Logger::getRootLogger();
 			$Log->error($msg);
 			$Log->error('IP['.$remote_addr.']');
 			$Log->error('Descripcion:'.$this->description.'');
@@ -70,13 +70,7 @@ class QrsException extends \Exception {
 		// Correo
 		if(function_exists("app_running_is")){
 			if(app_running_is('on_internet', true)){
-				//iplocation
-				Load::library('ip2locationlite.class');
-				$IPL = new ip2location_lite();
-				$IPL->setKey('860febf0cea1e85078a64aed84149b70afa3cb9fd4ffc34d2ab2ed346fe38ba9');
-				$ipdata = $IPL->getCity($remote_addr);
-				//$error = $IPL->getError();
-
+				
 				$id_usuario = isset($_SESSION['id_usuario'])?$_SESSION['id_usuario']:'N/A';
 				$usuario = isset($_SESSION['usuario'])?$_SESSION['usuario']:'N/A';
 				$id_cuenta = isset($_SESSION['id_cuenta'])?$_SESSION['id_cuenta']:'N/A';
@@ -84,22 +78,13 @@ class QrsException extends \Exception {
 
 				$para      = 'miguel.mendoza@totemti.com';
 				$titulo = 'Apkube Exception';
-				$mensaje = 'UsrID: '.$id_usuario.' '.$usuario.' Cuenta:'.$id_cuenta.' Email: '.$email_usr.',<br>URL['.fk_link().fk_get('url').'] - IP['.$_SERVER['REMOTE_ADDR'].'] - '.$ipdata['countryName'].','.$ipdata['regionName'].','.$ipdata['cityName'].'
-			 -
+				$mensaje = 'UsrID: '.$id_usuario.' '.$usuario.' Cuenta:'.$id_cuenta.' Email: '.$email_usr.',<br>URL['.fk_link().fk_get('url').'] - IP['.$_SERVER['REMOTE_ADDR'].'] -
 			'.$this->description.'DESCRIPCION:'.$this->description.' SOLUCION:'.$this->solution.' CODIGO SOLUCION:'.$this->solution_code.$this;
 				$cabeceras = 'From: mmendoza@totemti.com' . "\r\n" .
 						 'Reply-To: mmendoza@totemti.com' . "\r\n" .
 						 'X-Mailer: PHP/' . phpversion();
 
 				mail($para, $titulo, $mensaje, $cabeceras);
-				Load::model('Email');
-				$Email = new Email();
-				$Email->setSubject($titulo);
-				$Email->setTo('mmendoza000@gmail.com', 'Miguel Mendoza');
-				$Email->PutContent('{contenido}', '<pre>'.$mensaje.'</pre>');
-				$Email->useTemplate('general.php');
-				//$Email->send();
-				$Email->clearTemplateVars();
 			}
 		}
 		//header('HTTP/1.0 404 Not Found');
