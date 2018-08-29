@@ -144,8 +144,8 @@ $e->solution_code = '&lt?php<br />class '.get_class($this).' extends AppControll
 
 				}
 			}else{
-				if(file_exists(SYSTEM_PATH.'app/Errors/404.php')){
-					require(SYSTEM_PATH.'app/Errors/404.php');
+				if(file_exists(SYSTEM_PATH_QRS.'app/Errors/404.php')){
+					require(SYSTEM_PATH_QRS.'app/Errors/404.php');
 				}else{
 					require(dirname(__FILE__).'/Messages/Page/404.php');
 				}

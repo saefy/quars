@@ -14,7 +14,7 @@ class Bladex extends Blade{
 
 	public function __construct($path = null, ContainerInterface $container = null)
     {
-    	$path = $path ?? SYSTEM_PATH ;
+    	$path = $path ?? SYSTEM_PATH_QRS;
     	$viewPaths = $path . 'app/Views';
     	$cachePath = $path . 'app/Cache';
 

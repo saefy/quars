@@ -298,9 +298,7 @@ function fk_file_exists($f){
 
 	$rs = false;
 	if(trim($f)!=NULL && trim($f)!=''){
-
-		$rs = file_exists(SYSTEM_PATH.$f);
-
+		$rs = file_exists(SYSTEM_PATH_QRS.$f);
 	}
 
 	return $rs;
@@ -1213,7 +1211,7 @@ function fk_download_file($file,$file_name = null, $use_sys_path = TRUE,$file_ty
 	}
 
 	if($use_sys_path==true){
-		$f = SYSTEM_PATH.$file;
+		$f = SYSTEM_PATH_QRS.$file;
 	}else{ $f = $file; }
 
 

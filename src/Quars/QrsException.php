@@ -117,4 +117,3 @@ class QrsException extends \Exception {
 	} // QrsException -> show()
 
 }  // End Class
-?>

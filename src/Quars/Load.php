@@ -334,5 +334,3 @@ Este es el archivo '.$view_file.'
 	
 
 } // end Load
-
-
