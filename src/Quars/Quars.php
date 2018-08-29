@@ -187,17 +187,15 @@ class Quars {
 	 *@method Run()
 	 *@desc  runs Quars 
 	 **/
-	public static function Run(){
+	public static function Run($path = null){
 
-		
 		//load view
-		$path = fk_get_path();
+		if ($path === null) {
+			$path = fk_get_path();
+		}
+
 		$url_rs=self::url_processor($path);
 		
-		// print_r($url_rs);
-		
-
-
 		$controller_exist = false;
 		if( file_exists(SYSTEM_PATH.'app/controllers/'.$url_rs['file_controller']) ){ $controller_exist = true; }
 
