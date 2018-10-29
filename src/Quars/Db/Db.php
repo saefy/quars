@@ -349,6 +349,17 @@ class Db{
 	} // set_limit()
 
 	/**
+	 *@package db
+	 *@method clear()
+	 *@desc sets limit by statement
+	 *@since v0.3.1
+	 * */
+	public function clear(){
+		return $this->db_obj->clear();
+	} // clear()
+
+
+	/**
 	 * @package db
 	 * @method  result()
 	 * @desc executes database query and returns the records into an array

@@ -231,7 +231,7 @@ class Quars {
 						                    <b>'.$url_rs['file_controller'].'</b>  <br> O revisa la bandera <b>fix_path = On</b> en config';
 					}
 										
-					$e->solution_code = fk_str_format($cont_control,'html');
+					$e->solution_code = $cont_control;
 					$e->show('code_help');
 				}
 
@@ -247,9 +247,7 @@ class Quars {
 
 	} // End Run
 	public static function url_processor($url){
-
 		$file_lst = array();
-		echo $GLOBALS['QRS']['config']['APP']['mod_rewrite'];
 		if($GLOBALS['QRS']['config']['APP']['mod_rewrite']){
 			//----------------
 			//MOD REWRITE TRUE
@@ -318,12 +316,8 @@ class Quars {
 					if(isset($new_v[0]) && isset($new_v[1])){
 						$file_lst['get_vars'][$new_v[0]]=$new_v[1];
 					}
-
 				}
 			}
-
-
-
 		}
 
 		// return controller
@@ -338,11 +332,9 @@ class Quars {
 		// Controller
 		if(isset($file_lst['url'][1])){
 			$v = $file_lst['url'][1];
-			$controller_name = self::camelcase($v['value']);
+			$controller_name = self::camelcase(self::var_format($v['value']));
 			$file_controller = $controller_name.'Controller.php';
 			$controller = $controller_name.'Controller';
-
-			
 		}
 
 		//Method
@@ -361,12 +353,10 @@ class Quars {
 		
 		//$file_rs['directory_track']=$file_lst['url'];
 
-		$file_rs['get_vars']=@$file_lst['get_vars'];
+		$file_rs['get_vars']= $file_lst['get_vars'] ?? null;
 
 		return $file_rs;
-
 	} // url_processor($url)
-
 
 	public static function fk_autoload($autoload){
 		//Section Database
@@ -383,10 +373,8 @@ class Quars {
 		self::autoloader('app/plugins',$autoload['plugins']);   // Plugins
 		self::autoloader('app/libraries',$autoload['libraries']); // Libs
 		self::autoloader('app/helpers',$autoload['helpers']);   // Helpers
-
 	}
 	private static function autoloader($Dir,$Arr){
-
 		if(count($Arr)>0){
 			foreach ($Arr as $k=>$v){
 				if($Dir!='app/plugins'){
@@ -409,11 +397,12 @@ class Quars {
 		// database.ini
 		self::read_config_file('database');
 
-
+		// Load constants
+		include(SYSTEM_PATH_QRS.'app/config/app.php');
+		
 		//--------------------
 		// Set view,controler & model files variable
 		//--------------------
-
 
 		//--------------------
 		// Set database conection
@@ -426,7 +415,6 @@ class Quars {
 		// get environment activated
 		$env_on = $arr_app_act['database_mode'];
 		
-
 		//--------------------
 		// Set HTTP PATH
 		//--------------------
@@ -452,19 +440,13 @@ class Quars {
 
 		//SET LANGUAGE
 		$DEFAULT_LANGUAGE = $GLOBALS['QRS']['config']['APP']['default_language'];
-		$GLOBALS['APP_LANGUAGE']  = (@$_SESSION['language']!=null) ? $_SESSION['language'] : $DEFAULT_LANGUAGE ;
+		$GLOBALS['APP_LANGUAGE']  = $_SESSION['language'] ?? $DEFAULT_LANGUAGE ;
 
-
-
-		//pa($GLOBALS['QRS']);
-
-
-
+		// autoload: Execute on load 
+		include(SYSTEM_PATH_QRS.'app/config/autoload.php');
 	} // read_config
 
 	private static function read_config_file($FILE){
-
-		//
 		$cnf = include(SYSTEM_PATH_QRS.'app/config/'.$FILE.'.php');
 		$GLOBALS['QRS'][$FILE] = $cnf;
 		/*
@@ -513,7 +495,6 @@ class Quars {
 
 		}
 		*/
-
 	} // read_config_file
 
 	/**
@@ -551,37 +532,15 @@ class Quars {
 				$base_url = $GLOBALS['QRS']['RUNNING']['app']['www_server'];
 			}
 			
-
 			//--------------------
 			// Set HTTP PATH
 			//--------------------
 			//Set HTTP variable = www_server
 			define('HTTP',$base_url);
 		}
-
 	} // createUrlRelative
 
-
-	private static function encodedArray($StrEncoded){
-		/*
-		 * Generar array de caracteres especiales
-		 * ej: base64_encode("‡,Ž,’,—,œ,–,ç,ƒ,ê,î,ò,„")
-		 * */
-		$StrDecoded = base64_decode($StrEncoded);
-		eval("\$strByComas = \"$StrDecoded\";");
-		$Arr=explode(',', $strByComas);
-
-		return $Arr;
-	}
-
 	public static function var_format($txt){
-
-		// Para:  'a', 'e', 'i', 'o', 'u', 'n','A', 'E', 'I', 'O', 'U', 'N'
-		$find = self::encodedArray('4SzpLO0s8yz6LPEswSzJLM0s0yzaLNE=');
-
-		//Rememplazamos caracteres especiales latinos
-		$repl = array('a', 'e', 'i', 'o', 'u', 'n','A', 'E', 'I', 'O', 'U', 'N');
-		$txt = str_replace ($find, $repl, trim($txt));
 		// Anadimos los guiones
 		$find2 = array(' ', '&', '\r\n', '\n', '+');
 		$txt = str_replace ($find2, '_', $txt);

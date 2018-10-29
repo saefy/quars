@@ -495,10 +495,8 @@ db_type = mysql','html');
 
 			$SET = ' SET '.$set_fields;
 			$sql = 'UPDATE '.$table.' '.$SET.' '.$WHERE.'  LIMIT 1';
-
 			$rs = $this->query($sql);
-
-
+			
 		}else{
 
 			echo ' WHERE Required. Use: $db->set_where(" field = \'1\'") ';
@@ -665,6 +663,12 @@ db_type = mysql','html');
 
 	} // get_sql_string()
 
+	public function clear(){
+		$this->set_where('');
+		$this->set_select('');
+		$this->set_table('');
+		$this->set_where('');
+	}
 
 
 }

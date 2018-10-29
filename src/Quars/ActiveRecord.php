@@ -7,7 +7,7 @@
  */
 namespace Quars;
 
-Global $db;
+global $db;
 if (!$db) {  \Quars\Load::database(); }
 
 class ActiveRecord{

@@ -13,10 +13,10 @@ class Controller {
 	public $controller = 'index';
 	public $action = 'index';
 	public $only_ajax = false;
+	public $auto_run = true;
 
-	public $template_engine_enabled = false;
+	public $templateEngine = 'bladex';
 
-	public $Load; // load Object
 	public $load; // load Object
 	public $PermaLinkVars=array();
 	public $PermaLinkVarsText = '';
@@ -34,9 +34,9 @@ class Controller {
 		$this->url_processed = isset($url_params['url_processed'])?$url_params['url_processed']:'';
 		
 		// Define Objeto load
-		$this->Load = new Load();
 		$this->load = new Load();
-
+		$this->load->RenderEngine = $this->templateEngine;
+		
 		// Variables modulo y accion
 		$this->action = ($url_params['action']!=NULL) ? $url_params['action'] : $this->action;
 		$this->controller = substr($url_params['controller'],0,-10); // Set controller name
@@ -45,9 +45,10 @@ class Controller {
 		$this->getPermaLinkVars();
 
 		// ejecuta el method
-		if(method_exists($this,$this->action) ){
-			$this->runMetod($this->action);
-
+		if(method_exists($this,$this->action)){
+			if($this->auto_run){
+				$this->runMetod($this->action);
+			}
 		}else{
 			if($GLOBALS['QRS']['RUNNING']['app']['interactive']==true){
 
@@ -69,7 +70,9 @@ class Controller {
 
 						if(strpos($this->action,'_frm')){
 							// frorm
-$e->solution_code = '&lt?php<br />class '.get_class($this).' extends AppController {<br />    public function '.$this->action.'() {
+$e->solution_code = '&lt?php
+class '.get_class($this).' extends AppController {
+	    public function '.$this->action.'() {
 
         $F = new AppForm("table_name");
         echo $F->render($this->getCurrentUrl());
@@ -77,10 +80,12 @@ $e->solution_code = '&lt?php<br />class '.get_class($this).' extends AppControll
     } // End '.$this->action.'
 	
 }
-?&gt;';		
+';		
 						}elseif(strpos($this->action,'_lst')){
 							// list
-$e->solution_code = '&lt?php<br />class '.get_class($this).' extends AppController {<br />    public function '.$this->action.'() {
+$e->solution_code = '&lt?php
+class '.get_class($this).' extends AppController {
+	    public function '.$this->action.'() {
 
       Load::SpecialLib(\'applist.v2\');
       $L = new AppList(\'select * from cotizacion_linea\');
@@ -89,10 +94,12 @@ $e->solution_code = '&lt?php<br />class '.get_class($this).' extends AppControll
     } // End '.$this->action.'
 	
 }
-?&gt;';		
+';		
 						}elseif(strpos($this->action,'_spread')){
 							// spreadsheet
-$e->solution_code = '&lt?php<br />class '.get_class($this).' extends AppController {<br />    public function '.$this->action.'() {
+$e->solution_code = '&lt?php
+class '.get_class($this).' extends AppController {
+	    public function '.$this->action.'() {
 
       Load::library(\'AppSpreadSheet.v2\');
       $L = new AppSpreadSheet(\'select * from tabla_name\');
@@ -110,31 +117,39 @@ $e->solution_code = '&lt?php<br />class '.get_class($this).' extends AppControll
     } // End '.$this->action.'
 	
 }
-?&gt;';		
+';		
 
 						}else{
 							// page
-$e->solution_code = '&lt?php<br />class '.get_class($this).' extends AppController {<br />    public function '.$this->action.'() {
+$e->solution_code = '&lt?php
+namespace App\Controllers;
 
-      fk_header();
-      echo $this->load->view(\''.strtolower($this->controller).'/'.$this->action.'.php\' );
-      fk_footer();  
-    
-    } // End '.$this->action.'
-	
+use \Quars\Controller;
+use \Quars\Bladex;
+
+class '.get_class($this).' extends Controller {
+	public function '.$this->action.'() {
+		
+		$blade = new Bladex();
+		// app/Views/'.strtolower($this->controller).'/'.$this->action.'.blade.php 	
+		echo $blade->make(\''.strtolower($this->controller).'/'.$this->action.'\', $data);
+
+	} // End '.$this->action.'
 }
-?&gt;';		
+';		
 
 						}
 				
 						
 					}else{
-						$e->solution_code = '&lt?php<br />class '.get_class($this).' extends AppController {<br />    public function '.$this->action.'() {
+						$e->solution_code = '&lt?php
+						class '.get_class($this).' extends AppController {
+							    public function '.$this->action.'() {
     
     } // End '.$this->action.'
 	
 }
-?&gt;';	
+';	
 					}
 
 									
@@ -328,7 +343,6 @@ $e->solution_code = '&lt?php<br />class '.get_class($this).' extends AppControll
 	 *@since v0.1 beta
 	 * */
 	public function putContent($Index , $Content ){
-		$this->Load->PutContent($Index , $Content );
 		$this->load->PutContent($Index , $Content );
 	}
 
@@ -344,16 +358,5 @@ $e->solution_code = '&lt?php<br />class '.get_class($this).' extends AppControll
 	public function urlSegment($position){	
 		return (isset($this->PermaLinkVars[$position])? $this->PermaLinkVars[$position]:'');
 	}
-
-	/**
-	 *@package AppController
-	 *@method enableTemplateEngine();
-	 *@desc 	enables twig template engine 
-	 * */
-	public function enableTemplateEngine(){	
-		$this->template_engine_enabled = true;
-	}
-	
-	
 
 }

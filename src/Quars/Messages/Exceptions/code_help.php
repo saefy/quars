@@ -5,7 +5,7 @@
 <h3>Que hacer</h3>
 {solution}
 <div class="code"><pre>
-{solution_code}
+<textarea style="width:100%; height:250px;background:#f0d5de;font-size:13px;">{solution_code}</textarea>
 </pre></div>
 </div>
 <div class="qrs-exception-trace block"><pre>{trace}</pre>

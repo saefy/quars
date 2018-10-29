@@ -13,6 +13,9 @@ class Load{
 	// Contenido dinamico
 	private $ViewContent= array(); // Contenido
 	public $ReturnResult= false;  // False: Imprime resultado (Default), true devuelve resultado
+	public $RenderEngine = 'bladex';
+
+	private $view_file = '';
 
 	/**
 	 * @package load.class.php
@@ -23,49 +26,51 @@ class Load{
 	 *          3) $this->putContent('{list}',$listValues);$this->Load->View('folder/view.php');
 	 * @since 0.1 Beta
 	 */
-	public function view($view,$data = array(),$ReturnResult=false){
+	public function view($view,$data = [], $ReturnResult=false) {
 
 		// False: Imprime resultado, true devuelve resultado
-		$this -> ReturnResult = $ReturnResult;
+		$this->ReturnResult = $ReturnResult;
 
-		$view_file = 'app/Views/'.$view;
-		$view_file_path = SYSTEM_PATH_QRS.$view_file;
+		$this->view_file = 'app/Views/' . $view;
+		
+		if ($this->RenderEngine === 'bladex'){
+			$this->view_file .= '.blade.php';
+		}
+		$view_file_path = SYSTEM_PATH_QRS.$this->view_file;
 		$view_exist = false;
 		
-		if( file_exists($view_file_path) ){ $view_exist = true; }
-
-		if($view_exist==FALSE){
+		if (file_exists($view_file_path) ){ $view_exist = true; }
+		
+		if ($view_exist==FALSE) {
 			//view no existe
 			if($GLOBALS['QRS']['RUNNING']['app']['interactive']==true){
 
 				try{
-					throw new QrsException("Archivo: ".$view_file." no existe ");
+					throw new QrsException("Archivo: ".$this->view_file." no existe ");
 				}catch(QrsException $e){
-					$e->description='Es requerido el archivo view <b>'.$view_file.'</b>,
+					$e->description='Es requerido el archivo view <b>'.$this->view_file.'</b>,
 					                    sin embargo no fue encontrado';
 					
 					if(app_running_is('allow_dev_tools', 1)){
 						
 						$cont_control = file_get_contents(dirname(__FILE__).'/Blueprints/page.tpl');
-						$e->solution='Cree el archivo <b>'.$view_file.'</b> y agregue el codigo requerido. <a class="btn btn-danger" target="_blank"  href="'.fk_link('FkDev/index/?op=createfile&d='.encode('app/views').'&f='.encode($view).'&c='.encode($cont_control)).'">Usar Consola Dev</a>
+						$e->solution='Cree el archivo <b>'.$this->view_file.'</b> y agregue el codigo requerido. <a class="btn btn-danger" target="_blank"  href="'.fk_link('FkDev/index/?op=createfile&d='.encode('app/views').'&f='.encode($view).'&c='.encode($cont_control)).'">Usar Consola Dev</a>
 					                 Ejemplo:';
 					}else{
-						$e->solution='Cree el archivo <b>'.$view_file.'</b> y agregue el codigo requerido. 
+						$e->solution='Cree el archivo <b>'.$this->view_file.'</b> y agregue el codigo requerido. 
 					                 Ejemplo:';
 					}
 					
-					$e->solution_code= fk_str_format('<?php fk_header();?>
-Este es el archivo '.$view_file.'
-<?php fk_footer();?> ','html');
+					$e->solution_code= 'Este es el archivo '.$this->view_file.' ';
 					$e->show('code_help');
 
 				}
-					
+
 			}else{ die("<fieldset><h1>Error 404 -1: La p&aacute;gina no existe </h1></fieldset>"); }
 
 		}else{
 			// Preprocesar la vista
-			return $this->PreProcessFile($view_file_path,$data);
+			return $this->PreProcessFile($view, $data);
 		}
 
 	} // End View
@@ -91,7 +96,6 @@ Este es el archivo '.$view_file.'
 		}else{
 			// Cargar el modelo
 			Quars::_use('app/Models/'.$Model.'.php');
-
 		}
 	} // End Model
 	/**
@@ -160,7 +164,6 @@ Este es el archivo '.$view_file.'
 			if(count($Plugin)>0){
 				foreach ($Plugin as $k => $v) {
 					// Cargar el plugin
-
 					Quars::_use('app/Plugins/'.$v."/".$v.".class.php");
 					// get other variables (css code, css links, js code, js links )
 					Quars::_use("app/Plugins/".$v."/".$v.".utils.php");
@@ -182,64 +185,60 @@ Este es el archivo '.$view_file.'
 	 * @desc Pre process file replacing the content sent by $this->PutContent() method
 	 * @since 0.1 Beta
 	 */
-	private function PreProcessFile($File,$Arr = array()){
+	private function PreProcessFile($view, $data){
+		
+		if ($this->RenderEngine === 'bladex'){
+			$blade = new \Quars\Bladex();
+			$view_content = $blade->make($view, $data);
+		}else{
+			$view_file = 'app/Views/'.$view;
+			$view_file_path = SYSTEM_PATH_QRS.$view_file;
+			$view_content = file_get_contents($view_file_path);
+			// $view_content = $this->evalView($view_content, $data);
+		}
+		
+		if(app_config_is('utf8_encode', true)){
+			// if is utf8 returns value in utf8
+			$view_content = utf8_encode($view_content);
+		}
 
+		if($this->ReturnResult==TRUE){
+			return $view_content;
+		}else{
+			echo $view_content;
+			return;
+		}
+	} // End Pre Process
+
+	private function evalView($f_view,$Arr = array()){
 		// Declarar Arrays
 		$ArrSearch = array();
 		$ArrRepl   = array();
-
 		// Array de variables enviado por funcion
 		if(count($Arr)>0){
 			foreach ($Arr as $k => $v){
-
 				$$k = $v;
 			}
-
 		}
-
 		// Array generado por PutContent
 		if(count($this->ViewContent)>0){
 			foreach ($this->ViewContent as $k => $v){
 				$ArrSearch[] = $k;
 				$ArrRepl[] = $v;
 			}
-
-		}
-
-		$f_view = file_get_contents($File);
-
-		$view_content = str_replace($ArrSearch, $ArrRepl, $f_view);
-
-		$ViewResult = '';
-		if($this->ReturnResult==TRUE){
-			// Returns result
-			ob_start();
-			eval('?>' . $view_content . '<?php ');
-			echo $ViewResult = ob_get_contents();
-			ob_end_clean();
-
-		}else{
-
-			// Prints result
-			if(app_config_is('utf8_encode', true)){
-				// if is utf8 returns value in utf8
-				echo  utf8_encode(eval('?>' . $view_content . '<?php '));
-			}else{
-				echo  eval('?>' . $view_content . '<?php ');
-			}
-
 		}
 		
-		if(app_config_is('utf8_encode', true)){
-			// if is utf8 returns value in utf8
-			$ViewResult = utf8_encode($ViewResult);	
-			
-		}
-
+		$view_content = str_replace($ArrSearch, $ArrRepl, $f_view);
+		$ViewResult = '';
+		
+		// Returns result
+		ob_start();
+		eval('?>' . $view_content . '<?php ');
+		$ViewResult = ob_get_contents();
+		ob_end_clean();
+		
 		return $ViewResult;
-
-
-	} // End Pre Process
+	}
 
 	/**
 	 *@package load
@@ -267,13 +266,11 @@ Este es el archivo '.$view_file.'
 		require_once dirname(__FILE__) . '/Db/Adapters/db_'.$type.'.php';
 
 		//Instanciate global db object
-		Global $db;
+		global $db;
 		if($connect){
 			$db = new \Quars\Db\Db();
 			$db->connect();
 		}
-		
-			
 	}
 
 	public static function SpecialLib($Library){
@@ -329,7 +326,7 @@ Este es el archivo '.$view_file.'
 	* @since 0.3.4
 	*/
 	public static function recordModel($recordModel){
-		self::model('records/'.$recordModel);
+		self::model('Records/'.$recordModel);
 	} // End recordModel
 	
 

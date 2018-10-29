@@ -5,7 +5,16 @@
  * @package  Quars
  * @author   Miguel Mendoza <mmendoza000@gmail.com>
  */
-// use \App\Models\configSysModel;
+
+// Default consts
+fk_defined('OK_ICON', '<i class="fas fa-check"></i>');
+fk_defined('ALERT_ICON', '<i class="fas fa-exclamation-triangle"></i>');
+
+function fk_defined($const, $val){
+	if(!defined($const)){
+		define($const, $val);
+	}
+}
 function fk_theme($pTheme=null){
 	if($pTheme !== null){
 		$theme = $pTheme;
@@ -65,7 +74,7 @@ function fk_header($theme = NULL){
 	if(display_header_footer()){
 		if(display_blank_header()){
 			// Display Blank Header
-			fk::blank_header();
+			blank_header();
 		}else{
 			// Header normal
 			\Quars\Quars::_use('public/frontend/themes/'.$theme.'/header.php');
@@ -74,6 +83,28 @@ function fk_header($theme = NULL){
 	}
 
 }
+function blank_header(){
+	?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title><?php echo fk_document_title();?></title>
+	<?php echo fk_css_load();?>
+	<script src="<?php echo fk_link();?>frontend/themes/saefy/js/jquery.js"></script>
+	<?php echo fk_js_load();?>
+</head>
+<body>
+	<?php
+} // blank_header()
+
+function blank_footer(){
+	?>
+</body>
+</html>
+	<?php
+
+} // blank_header()
+
 function fk_footer($theme = NULL){
 
 	if($theme==NULL){
@@ -83,7 +114,7 @@ function fk_footer($theme = NULL){
 
 		if(display_blank_header()){
 			// Display Blank Header
-			fk::blank_footer();
+			blank_footer();
 		}else{
 			// Header normal
 			\Quars\Quars::_use('public/frontend/themes/'.$theme.'/footer.php');
@@ -203,68 +234,27 @@ function fk_money_format($amount,$mode=''){
 	return $mon_val;
 }
 
-function encodedArray($StrEncoded){
-	/*
-	 * Generar array de caracteres especiales
-	 * ej: base64_encode("�,�,�,�,�,�,�,�,�,�,�,�")
-	 * */
-	$StrDecoded = base64_decode($StrEncoded);
-	eval("\$strByComas = \"$StrDecoded\";");
-	$Arr=explode(',', $strByComas);
-
-	return $Arr;
-}
-
-function fk_str_format($txt,$f = 'html:no-tags',$f_2 = ''){
-	// Para:  'a', 'e', 'i', 'o', 'u', 'n','A', 'E', 'I', 'O', 'U', 'N'
-	$find = encodedArray('4SzpLO0s8yz6LPEswSzJLM0s0yzaLNE=');
-	// Para:  'a', 'e', 'i', 'o', 'u', 'n','A', 'E', 'I', 'O', 'U', 'N','<','>','"'
-	$arr1 = encodedArray('4SzpLO0s8yz6LPEswSzJLM0s0yzaLNEsPCw+');
-	$findHtml = array_merge($arr1,array('"')); // Add quot
+function fk_str_format($txt,$f = 'txt' ,$f_2 = ''){
 
 	switch($f){
-		//---------HTML---------------
-		case "html":
-
-			$repl = array('&aacute;', '&eacute;', '&iacute;', '&oacute;', '&uacute;', '&ntilde;'
-			,'&Aacute;', '&Eacute;', '&Iacute;', '&Oacute;', '&Uacute;', '&Ntilde;','&lt;','&gt;','&quot;');
-			$txt = str_replace ($findHtml, $repl, $txt);
-			$txtrs = $txt;
-			break;
-			//---------HTML respetando los <>---------------
-		case "html:no-tags":
-
-			$repl = array('&aacute;', '&eacute;', '&iacute;', '&oacute;', '&uacute;', '&ntilde;'
-			,'&Aacute;', '&Eacute;', '&Iacute;', '&Oacute;', '&Uacute;', '&Ntilde;');
-			$txt = str_replace ($find, $repl, $txt);
-			$txtrs = $txt;
-			break;
-			//---------Texto plano---------------
+		//---------Texto plano---------------
 		case "txt":
-
-			$repl = array('a', 'e', 'i', 'o', 'u', 'n','A', 'E', 'I', 'O', 'U', 'N');
-			$txt = str_replace ($find, $repl, $txt);
-			$txtrs = $txt;
+			// $txtrs = iconv('UTF-8', 'ISO-8859-1//TRANSLIT//IGNORE', $txt);
+			$txtrs = transliterator_transliterate('Any-Latin; Latin-ASCII; [\u0080-\u7fff] remove', $txt);
 			break;
 			//---------For Url link---------------
 		case "url":
 			//Rememplazamos caracteres especiales latinos
-
-			$repl = array('a', 'e', 'i', 'o', 'u', 'n','A', 'E', 'I', 'O', 'U', 'N');
-			$txt = str_replace ($find, $repl, $txt);
-			// A�aadimos los guiones
+			// Anaadimos los guiones
 			$find2 = array(' ', '&', '\r\n', '\n', '+');
 			$txt = str_replace ($find2, '-', $txt);
-			// Eliminamos y Reemplazamos dem�s caracteres especiales
+			// Eliminamos y Reemplazamos demas caracteres especiales
 			$find3 = array('/[^A-Za-z0-9\-<>.$]/', '/[\-]+/', '/<[^>]*>/');
 			$repl = array('', '-', '');
 			$txt = preg_replace ($find3, $repl, $txt);
 			$txtrs = $txt;
 			break;
 		case "php_var":
-			//Rememplazamos caracteres especiales latinos
-			$repl = array('a', 'e', 'i', 'o', 'u', 'n','A', 'E', 'I', 'O', 'U', 'N');
-			$txt = str_replace ($find, $repl, trim($txt));
 			// Anadimos los guiones
 			$find2 = array(' ', '&', '\r\n', '\n', '+');
 			$txt = str_replace ($find2, '_', $txt);
@@ -278,15 +268,12 @@ function fk_str_format($txt,$f = 'html:no-tags',$f_2 = ''){
 		case "camelcase":
 			$txtrs =  camelcase($txt);
 			break;
-
 	 default:
 	 	$txtrs = $txt;
 	 	break;
-
 	} // End Case
 
 	// Second Format "CamelCase"
-
 	if($f_2 == 'camelcase'){
 		$txtrs = camelcase($txtrs);
 	}
@@ -380,27 +367,21 @@ function fk_css_v3(){
 }
 function fk_css_load(){
 	#print all css links
-	$js_path = HTTP.'frontend/javascript/';
+	$js_path = HTTP.'frontend/js/';
 	$css_path = HTTP.'frontend/css/';
-	echo '<link rel="stylesheet" type="text/css" href="'.HTTP.'frontend/javascript/CODE/snackbar/snackbar.min.css"/ >';
+	echo '<link rel="stylesheet" type="text/css" href="'.HTTP.'frontend/js/libs/snackbar/snackbar.min.css"/ >';
 	echo $GLOBALS['QRS']['css_links'];
-
-
 }
 function fk_js_load(){
-	$js_path = HTTP.'frontend/javascript/';
-
+	$js_path = HTTP.'frontend/js/';
 	?>
 <script language="javascript" type="text/javascript"> var HTTP = "<?php echo HTTP?>"; var HTTP_FILE = "<?php if($GLOBALS['QRS']['config']['APP']['mod_rewrite']){echo HTTP;}else{echo HTTP.'index.php/';} ?>";</script>
-<script	type="text/javascript" src="<?php echo $js_path;?>fk.js"></script>
-<script	type="text/javascript" src="<?php echo $js_path;?>kui.js"></script>
-<script	type="text/javascript" src="<?php echo $js_path;?>custom.js"></script>
-<script type="text/javascript" src="<?php echo $js_path;?>CODE/validate/jquery.validate.js"></script>
-<script type="text/javascript" src="<?php echo $js_path;?>CODE/snackbar/snackbar.min.js"></script>
-
+<script	type="text/javascript" src="<?php echo $js_path;?>fk.js?v=<?php echo JS_VERSION?>"></script>
+<script	type="text/javascript" src="<?php echo $js_path;?>kui.js?v=<?php echo JS_VERSION?>"></script>
+<script	type="text/javascript" src="<?php echo $js_path;?>custom.js?v=<?php echo JS_VERSION?>"></script>
+<script type="text/javascript" src="<?php echo $js_path;?>libs/validate/jquery.validate.js"></script>
+<script type="text/javascript" src="<?php echo $js_path;?>libs/snackbar/snackbar.min.js"></script>
 <?php echo $GLOBALS['QRS']['js_links'];
-
-
 }
 function fk_js_v3(){
 	$js_path = HTTP.'frontend/javascript/';
@@ -427,13 +408,9 @@ function fk_js_v2(){
 
 	?>
 <script language="javascript" type="text/javascript"> var HTTP = "<?php echo HTTP?>"; var HTTP_FILE = "<?php if($GLOBALS['QRS']['config']['APP']['mod_rewrite']){echo HTTP;}else{echo HTTP.'index.php/';} ?>";</script>
-<script
-	type="text/javascript" src="<?php echo $js_path;?>fk.js"></script>
-<script
-	type="text/javascript" src="<?php echo $js_path;?>custom.js"></script>
-<script
-	type="text/javascript"
-	src="<?php echo $js_path;?>CODE/validate/jquery.validate.js"></script>
+<script type="text/javascript" src="<?php echo $js_path;?>fk.js"></script>
+<script type="text/javascript" src="<?php echo $js_path;?>custom.js"></script>
+<script type="text/javascript" src="<?php echo $js_path;?>CODE/validate/jquery.validate.js"></script>
 	<?php
 	echo $GLOBALS['QRS']['js_links'];
 
@@ -449,11 +426,10 @@ function fk_css(){
 <style type="text/css" title="currentStyle">
 @import "<?php echo $js_path;?>CODE/dataTables/media/css/demo_page.css";
 
-@import
-	"<?php echo $js_path;?>CODE/dataTables/media/css/demo_table_jui.css";
+@import "<?php echo $js_path;?>CODE/dataTables/media/css/demo_table_jui.css";
 </style>
 	<?php
-	#print all css links
+	// print all css links
 }
 
 function fk_menu($IdMenu,$SelectedItem){
@@ -518,7 +494,7 @@ function fk_select_options($SQL,$SELECTED = NULL){
 		if(isset($OPT[2])){ $code = 'code="'.utf8_encode($OPT[2]).'"'; }
 
 		if($OPT[0]==$sel){ $IS_SELECTED='selected="selected"';}else{$IS_SELECTED='';}
-		$OPTION .= '<option value="'.$OPT[0].'" '.$code.' '.$IS_SELECTED.'>'.fk_str_format($OPT[1], 'html').'</option>';
+		$OPTION .= '<option value="'.$OPT[0].'" '.$code.' '.$IS_SELECTED.'>'.$OPT[1].'</option>';
 	}
 
 	return $OPTION;
@@ -573,7 +549,7 @@ function fk_search_field($id,$name,$value,$text_value,$formcode,$sql,$onclick=nu
 		datumTokenizer: Bloodhound.tokenizers.obj.whitespace("value"),
 		queryTokenizer: Bloodhound.tokenizers.whitespace,
 		remote: {
-		  url: HTTP+"FkMaster/autocompleteAppForm/'.$table.'/'.$field_id_html.'/?q=%QUERY",
+		  url: HTTP+"QrsGate/autocompleteAppForm/'.$table.'/'.$field_id_html.'/?q=%QUERY",
 		  wildcard: "%QUERY"
 		}
 	});
@@ -631,11 +607,11 @@ function fk_file_field($id,$name,$value,$onclick=null,$cssExtra='',$mode='edit',
 
 	if($mode=='edit'){
 		$html_fld .='<input id="'.$id.'" name="'.$name.'" type="hidden" value="'.$value.'" class="'.$cssExtra.'" />';
-		$html_fld .='<br><iframe src="'.fk_link().'FkMaster/upolader/'.$id.'/" name="ifrmupl-'.$id.'" style="width:95%;height:45px;" frameborder="0"></iframe>';
+		$html_fld .='<br><iframe src="'.fk_link().'QrsGate/upolader/'.$id.'/" name="ifrmupl-'.$id.'" style="width:95%;height:45px;" frameborder="0"></iframe>';
 	}
 
 	$file_data = '';
-	$ArUpl = new ActiveRecord('uploads');
+	$ArUpl = new \Quars\ActiveRecord('uploads');
 	$totUpl = $ArUpl->find($value);
 
 	if($totUpl==1){
@@ -659,7 +635,7 @@ function fk_file_field($id,$name,$value,$onclick=null,$cssExtra='',$mode='edit',
 function fk_get_image($id){
 
 	$file_data = '';
-	$ArUpl = new ActiveRecord('uploads');
+	$ArUpl = new \Quars\ActiveRecord('uploads');
 	$totUpl = $ArUpl->find($id);
 
 	return http_uploads().$ArUpl->fields['archivo'];
@@ -769,7 +745,7 @@ function fk_autocomplete_v2($id,$name,$value,$text_value,$table,$sql,$onclick=nu
 	$html_fld .='<input id="f2-'.$id.'" name="f2-'.$name.'" type="text" value="'.$text_value.'" class="txt searchbox '.$cssExtra.'"  />';
 
 	/*
-	$html_fld .=  '<script>$( "#f2-'.$id.'" ).autocomplete({source: HTTP+"FkMaster/autocomplete2/'.encode($table).'/'.encode($id).'/",
+	$html_fld .=  '<script>$( "#f2-'.$id.'" ).autocomplete({source: HTTP+"QrsGate/autocomplete2/'.encode($table).'/'.encode($id).'/",
 	           select: function( event, ui ) {
                 $("#f2-'.$id.'").val( ui.item.label );
                 $("#'.$id.'").val( ui.item.id );
@@ -805,7 +781,7 @@ $(function(){
   	    source: function (query, process) {
   	    	$.ajax({
   	    		  type: "POST",
-  	    		  url: HTTP+"FkMaster/autocomplete3/'.$url_code.'/",
+  	    		  url: HTTP+"QrsGate/autocomplete3/'.$url_code.'/",
   	    		  data: "&query="+query,
   	    		  dataType: "JSON",
   	    		  async:true,
@@ -849,7 +825,7 @@ $(function(){
 	datumTokenizer: Bloodhound.tokenizers.obj.whitespace("value"),
 	queryTokenizer: Bloodhound.tokenizers.whitespace,
 	remote: {
-	  url: HTTP+"FkMaster/autocomplete3/'.$url_code.'/?q=%QUERY",
+	  url: HTTP+"QrsGate/autocomplete3/'.$url_code.'/?q=%QUERY",
 	  wildcard: "%QUERY"
 	}
 });
@@ -899,7 +875,7 @@ $(function(){
 	datumTokenizer: Bloodhound.tokenizers.obj.whitespace("value"),
 	queryTokenizer: Bloodhound.tokenizers.whitespace,
 	remote: {
-	  url: HTTP+"FkMaster/autocomplete3/'.$url_code.'/?q=%QUERY",
+	  url: HTTP+"QrsGate/autocomplete3/'.$url_code.'/?q=%QUERY",
 	  wildcard: "%QUERY"
 	}
 });
@@ -960,7 +936,7 @@ function fk_select_text($table,$fields,$id_selected){
 	$table_ar = explode(' ', $table_ar);
 	$table_ar = $table_ar[0];
 
-	$rec = new ActiveRecord($table_ar);
+	$rec = new \Quars\ActiveRecord($table_ar);
 
 	$WHERE = ' WHERE '.$rec-> id_field_name.' = "'.$id_selected.'" ';
 
@@ -1025,8 +1001,18 @@ function fk_select_options_r($array,$SELECTED = NULL){
 
 	$OPTION = '';
 	foreach($array as $k=>$v){
-		if($k==$SELECTED){ $IS_SELECTED='selected="selected"';}else{$IS_SELECTED='';}
-		$OPTION .= '<option value="'.$k.'" '.$IS_SELECTED.'>'.$v.'</option>';
+		$value = '';
+		$ico = '';
+		if ($k==$SELECTED){ $IS_SELECTED='selected="selected"';}else{$IS_SELECTED='';}
+		if (is_array($v)) {
+			$value = $v['text'];
+			if(isset($v['ico'])){
+				$ico = 'data-icon="'.$v['ico'].'"';
+			}
+		} else {
+			$value = $v;
+		}
+		$OPTION .= '<option value="'.$k.'" '.$ico.' '.$IS_SELECTED.'>'.$value.'</option>';	
 	}
 	return $OPTION;
 
@@ -1189,9 +1175,9 @@ function fk_plural($tot,$plural,$singular = ''){
 function __($str){
 
 	if(!defined($str)){
-		return fk_str_format($str, 'html:no-tags');
+		return $str;
 	}else{
-		return fk_str_format(constant($str), 'html:no-tags');
+		return constant($str);
 	}
 
 }
@@ -1341,7 +1327,7 @@ function fk_ok_message_dialog($Message,$AutoClose = TRUE){
 	if($AutoClose==TRUE){
 		$x .='setTimeout("$( \'#'.$id.'\' ).dialog(\'close\')",3000);';
 	}
-	$x.='</script><div id="'.$id.'" title="Mensaje" ><div class="fk-ok-message">'.OK_ICON.$Message.'</div></div>';
+	$x.='</script><div id="'.$id.'" title="Mensaje" ><div class="fk-ok-message">'.OK_ICON.' '.$Message.'</div></div>';
 
 	return $x;
 
@@ -1349,7 +1335,7 @@ function fk_ok_message_dialog($Message,$AutoClose = TRUE){
 function fk_ok_message($Message,$AutoHide = TRUE){
 	$id = 'fk-message-'.encode(rand('10000000','10000000000'));
 
-	$x = '<div id="'.$id.'" class="alert alert-success">'.OK_ICON.__($Message).'</div>';
+	$x = '<div id="'.$id.'" class="alert alert-success">'.OK_ICON.' '.__($Message).'</div>';
 	if($AutoHide==TRUE){
 		$x .= '<script>setTimeout(function(){$("#'.$id.'").hide(400);},2000);</script>';
 	}
@@ -1373,7 +1359,7 @@ function fk_alert_message_dialog($Message,$AutoClose = TRUE){
 	if($AutoClose==TRUE){
 		$x .='setTimeout("$( \'#'.$id.'\' ).dialog(\'close\')",3000);';
 	}
-	$x.='</script><div id="'.$id.'" title="Alerta" ><div class="fk-alert-message">'.ALERT_ICON.__($Message).'</div></div>';
+	$x.='</script><div id="'.$id.'" title="Alerta" ><div class="fk-alert-message">'.ALERT_ICON.' '.__($Message).'</div></div>';
 
 	return $x;
 
@@ -1438,18 +1424,13 @@ function fk_post($val){
 function fk_form_var($val,$type='',$url_p=''){
 	$rs = '';
 
-
-
 	if(isset($_GET['fk_url_load'])){
 		 $url = str_replace('/', '', $_GET['fk_url_load']);
 	}else{
-		 $url = str_replace('/', '', fk_get('url'));
+		 $url = str_replace('/', '', fk_get_path());
 	}
 
 	if($url_p!=''){$url = str_replace('/', '', $url_p);}
-
-	//echo $url;
-	//echo '<br>';
 	$url = str_replace('index', '', $url);
 	$url = encode($url);
 
@@ -1457,16 +1438,15 @@ function fk_form_var($val,$type='',$url_p=''){
 
 	$conf_code = 'FORMVAL:'.$_SESSION['id_usuario'].':'.$url.':'.$val;
 
-
 	// get or post first
 	if(isset($_POST[$val])){
 		$rs =  $_POST[$val];
 		//$_SESSION['formvars'][$url][$val] = $rs;
-		\App\Models\configSysModel::updateConfigSys($conf_code, $rs);
+		\App\Models\ConfigSys::updateConfigSys($conf_code, $rs);
 	}elseif(isset($_GET[$val])){
 		$rs =  $_GET[$val];
 		//$_SESSION['formvars'][$url][$val] = $rs;
-		\App\Models\configSysModel::updateConfigSys($conf_code, $rs);
+		\App\Models\ConfigSys::updateConfigSys($conf_code, $rs);
 	}else{
 		$get_or_post = false;
 	}
@@ -1474,13 +1454,13 @@ function fk_form_var($val,$type='',$url_p=''){
 	// type exceptions
 	if($type=='checkbox' && $get_or_post==false){
 		//$_SESSION['formvars'][$url][$val] = '';
-		\App\Models\configSysModel::updateConfigSys($conf_code, '');
+		\App\Models\ConfigSys::updateConfigSys($conf_code, '');
 	}
 
 
 	if($get_or_post==false){
 
-		$rs = \App\Models\configSysModel::getConfigSys($conf_code);
+		$rs = \App\Models\ConfigSys::getConfigSys($conf_code);
 	}
 
 	//echo $conf_code.' ';
@@ -1797,47 +1777,6 @@ function app_is_hosted_on_internet(){
 	}
 
 }
-function uploads_directory(){
-	return UPLOADS_DIRECTORY;
-}
-
-
-
-/**
- * @desc devuelve enlace back similar a history.go(-1) en javascript
- * */
-function go_back($default_link = NULL){
-
-	$default_link = ($default_link == NULL) ? fk_link() : fk_link().$default_link ;
-	$serv_refer = isset($_SERVER['HTTP_REFERER'])? $_SERVER['HTTP_REFERER'] : '';
-	$url_refer = get_domain_url($serv_refer);
-	$url_this_site = get_domain_url(fk_link());
-	$link_refer = ($url_this_site==$url_refer) ? $_SERVER['HTTP_REFERER'] : $default_link;
-	return $link_refer;
-}
-
-/**
- * @desc genera un transaction key
- * */
-function setTransactionKey(){
-
-	$t_key = uniqid();
-	$_SESSION['TRANSACTION_KEY'] = $t_key;
-	return $t_key;
-}
-/**
- * @desc comprueba transaction key generado en la ultima operacion
- * */
-function confirmTransactionKey($t_key){
-
-	$TransactionKey = isset($_SESSION['TRANSACTION_KEY'])?$_SESSION['TRANSACTION_KEY']:NULL;
-
-	if($t_key==$TransactionKey && $TransactionKey!=NULL ){
-		return true;
-	}else{
-		return false;
-	}
-}
 
 function get_domain_url($url){
 	$arrSrc = array('http://www.','https://www.','http://','https://');
@@ -1845,79 +1784,6 @@ function get_domain_url($url){
 	$url_1 = explode('/', $url);
 	$url = $url_1[0];
 	return $url;
-}
-
-/**
- * @desc verifica la http url y el tipo de navegador y envia a mobil o al descktop
- * */
-function verify_http_path(){
-
-	$domain_url = get_domain_url(fk_link());
-	$req_host = $_SERVER['HTTP_HOST'];
-
-	if($req_host!=$domain_url){
-		header('Location:'.fk_link());
-	}
-
-}
-
-function get_defined_url($code){
-	if(app_is_hosted_on_internet()){
-		return constant('www_'.$code);
-	}else{
-		return constant('loc_'.$code);
-	}
-}
-function google_verification(){
-	if(app_is_hosted_on_internet()){
-		?>
-<meta
-	name="google-site-verification"
-	content="1s-3KIfA7rj5Gs6EJx0QXhodRREr3z5hetX4HpF8rW4" />
-		<?php
-	}
-
-}
-
-function google_analytics(){
-	if(app_is_hosted_on_internet()){
-
-		?>
-<script type="text/javascript">
-  var _gaq = _gaq || [];
-  _gaq.push(['_setAccount', 'UA-3858434-15']);
-  _gaq.push(['_setDomainName', 'apkub.com']);
-  _gaq.push(['_trackPageview']);
-
-  (function() {
-    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-  })();
-
-</script>
-		<?php
-
-	}
-
-
-}
-
-function zerofill($entero, $largo){
-
-	$relleno = '';
-
-	if (strlen($entero) < $largo) {$relleno = str_repeat('0', $largo-strlen($entero));}
-	return $relleno . $entero;
-}
-
-function codigo_referencia_banco($code){
-
-	$code = zerofill($code, 4);
-	$code_ref = 'EK-'.$code;
-
-	return $code_ref;
-
 }
 
 function format_time($t,$f=':') // t = seconds, f = separator
@@ -1970,15 +1836,15 @@ function userTimezone($date){
 		return $DateTime;
 }
 
-function encrypt($cadena){
-    $key='hola97971';  // Una clave de codificacion, debe usarse la misma para encriptar y desencriptar
-    $encrypted = base64_encode(mcrypt_encrypt(MCRYPT_RIJNDAEL_256, md5($key), $cadena, MCRYPT_MODE_CBC, md5(md5($key))));
-    return $encrypted; //Devuelve el string encriptado
- 
-}
- 
-function decrypt($cadena){
-     $key='hola97971';  // Una clave de codificacion, debe usarse la misma para encriptar y desencriptar
-     $decrypted = rtrim(mcrypt_decrypt(MCRYPT_RIJNDAEL_256, md5($key), base64_decode($cadena), MCRYPT_MODE_CBC, md5(md5($key))), "\0");
-    return $decrypted;  //Devuelve el string desencriptado
+if (! function_exists('app')) {
+    /**
+     * Get the available container instance.
+     *
+     * @param  string  $make
+     * @param  array   $parameters
+     */
+    function app($make = null, $parameters = []){
+		$obj = new $make(...$parameters);
+		return $obj->render();
+    }
 }

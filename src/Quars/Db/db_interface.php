@@ -176,5 +176,14 @@ interface db_interface{
 	 *@since v0.3.1
 	 * */
 	public function get_sql_string();
+
+	/**
+	 *@package db
+	 *@method clear()
+	 *@desc clears the sql
+	 *@since v3.3.1
+	 * */
+	public function clear();
+	
 	
 }

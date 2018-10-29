@@ -3,3 +3,4 @@ composer.lock
 vendor
 .phpintel
 application_example
+launch.json
