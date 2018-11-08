@@ -531,12 +531,18 @@ class Quars {
 			}else{
 				$base_url = $GLOBALS['QRS']['RUNNING']['app']['www_server'];
 			}
-			
+
+			if(defined('GET_PATH_ROOT')){
+				$p_root = GET_PATH_ROOT;
+				$base_url = preg_replace("/$p_root/", '', $base_url, 1); 
+				$base_url = trim($base_url, '/').'/';
+			}
+
 			//--------------------
 			// Set HTTP PATH
 			//--------------------
 			//Set HTTP variable = www_server
-			define('HTTP',$base_url);
+			define('HTTP',$base_url);			
 		}
 	} // createUrlRelative
 

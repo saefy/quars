@@ -9,7 +9,12 @@
 // Default consts
 fk_defined('OK_ICON', '<i class="fas fa-check"></i>');
 fk_defined('ALERT_ICON', '<i class="fas fa-exclamation-triangle"></i>');
-
+function getQrsGatePath() {
+	if (defined('GET_PATH_ROOT')) {
+		return GET_PATH_ROOT.'/QrsGate/';
+	}
+	return 'QrsGate/';
+}
 function fk_defined($const, $val){
 	if(!defined($const)){
 		define($const, $val);
@@ -148,15 +153,16 @@ function fk_get_path(){
 		$path =  trim($path,'/');
 	}
 
+	if(defined('GET_PATH_ROOT')){
+		$p_root = GET_PATH_ROOT;
+		$path = preg_replace("/$p_root/", '', $path, 1); 
+	}
+
 	return $path;
 
 }
 
 function fk_link($p_lnk = ''){
-
-
-
-
 	if($GLOBALS['QRS']['config']['APP']['mod_rewrite']){
 		//mod rewrite
 		$link = HTTP.$p_lnk;
@@ -165,36 +171,22 @@ function fk_link($p_lnk = ''){
 		}else{
 			$link = HTTP.$p_lnk;
 		}*/
-
-
 	}else{
 
 		//example.com/index.php//news/article/my_article/
 		//$p_lnk = "/news/article/my_article/&v2=test";
 
 		// no mod rewrite
-
-
-
-
 		$url_vars = explode('?',$p_lnk);
 
 		$url = isset($url_vars[0])?$url_vars[0]:'';
 		$url .= isset($url_vars[1])?'?'.$url_vars[1]:'';
-
-
-
 		//$url = str_replace('/','|',$url);
 		// 'Account::Producto?{x=1;y=2}';
-
 		$link = HTTP."index.php/".$url;
-
-
-
 	}
 
 	return $link;
-
 }
 
 
@@ -292,7 +284,8 @@ function fk_file_exists($f){
 }
 
 function fk_js(){
-	$js_path = HTTP.'frontend/javascript/';
+	// $js_path = HTTP.'frontend/javascript/';
+	$js_path = 'frontend/javascript/';
 
 	?>
 <script language="javascript" type="text/javascript"> var HTTP = "<?php echo HTTP?>"; var HTTP_FILE = "<?php if($GLOBALS['QRS']['config']['APP']['mod_rewrite']){echo HTTP;}else{echo HTTP.'index.php/';} ?>";</script>
@@ -333,7 +326,7 @@ function fk_js_addResource($url,$default_path = true){
 		$url = 'app/Resources/'.$url;
 	}
 	//$GLOBALS['QRS']['js_links'] .= '<script src="'.HTTP.'frontend/fk_utils/FkResource.php?r='.encode($url).'&t=js" type="text/javascript"></script>
-	$GLOBALS['QRS']['js_links'] .= '<script src="'.fk_link('QrsGate/Resource/').'?r='.encode($url).'&t=js" type="text/javascript"></script>
+	$GLOBALS['QRS']['js_links'] .= '<script src="'.fk_link(getQrsGatePath().'Resource/').'?r='.encode($url).'&t=js" type="text/javascript"></script>
 ';
 }
 
@@ -343,7 +336,7 @@ function fk_css_addResource($url,$default_path = true){
 		$url = 'app/Resources/'.$url;
 	}
 	//$GLOBALS['QRS']['css_links'] .= '<link type="text/css" href="'.HTTP.'frontend/fk_utils/FkResource.php?r='.encode($url).'&t=css" rel="stylesheet" />
-	$GLOBALS['QRS']['css_links'] .= '<link type="text/css" href="'.fk_link('QrsGate/Resource/').'?r='.encode($url).'&t=css" rel="stylesheet" />
+	$GLOBALS['QRS']['css_links'] .= '<link type="text/css" href="'.fk_link(getQrsGatePath().'Resource/').'?r='.encode($url).'&t=css" rel="stylesheet" />
 ';
 }
 
@@ -417,7 +410,8 @@ function fk_js_v2(){
 }
 function fk_css(){
 
-	$js_path = HTTP.'frontend/javascript/';
+	// $js_path = HTTP.'frontend/javascript/';
+	$js_path = 'frontend/javascript/';
 	echo $GLOBALS['QRS']['css_links'];
 	?>
 <link type="text/css"
@@ -549,7 +543,7 @@ function fk_search_field($id,$name,$value,$text_value,$formcode,$sql,$onclick=nu
 		datumTokenizer: Bloodhound.tokenizers.obj.whitespace("value"),
 		queryTokenizer: Bloodhound.tokenizers.whitespace,
 		remote: {
-		  url: HTTP+"QrsGate/autocompleteAppForm/'.$table.'/'.$field_id_html.'/?q=%QUERY",
+		  url: HTTP+"'.getQrsGatePath().'autocompleteAppForm/'.$table.'/'.$field_id_html.'/?q=%QUERY",
 		  wildcard: "%QUERY"
 		}
 	});
@@ -607,7 +601,7 @@ function fk_file_field($id,$name,$value,$onclick=null,$cssExtra='',$mode='edit',
 
 	if($mode=='edit'){
 		$html_fld .='<input id="'.$id.'" name="'.$name.'" type="hidden" value="'.$value.'" class="'.$cssExtra.'" />';
-		$html_fld .='<br><iframe src="'.fk_link().'QrsGate/upolader/'.$id.'/" name="ifrmupl-'.$id.'" style="width:95%;height:45px;" frameborder="0"></iframe>';
+		$html_fld .='<br><iframe src="'.fk_link().getQrsGatePath().'upolader/'.$id.'/" name="ifrmupl-'.$id.'" style="width:95%;height:45px;" frameborder="0"></iframe>';
 	}
 
 	$file_data = '';
@@ -745,7 +739,7 @@ function fk_autocomplete_v2($id,$name,$value,$text_value,$table,$sql,$onclick=nu
 	$html_fld .='<input id="f2-'.$id.'" name="f2-'.$name.'" type="text" value="'.$text_value.'" class="txt searchbox '.$cssExtra.'"  />';
 
 	/*
-	$html_fld .=  '<script>$( "#f2-'.$id.'" ).autocomplete({source: HTTP+"QrsGate/autocomplete2/'.encode($table).'/'.encode($id).'/",
+	$html_fld .=  '<script>$( "#f2-'.$id.'" ).autocomplete({source: HTTP+"'.getQrsGatePath().'autocomplete2/'.encode($table).'/'.encode($id).'/",
 	           select: function( event, ui ) {
                 $("#f2-'.$id.'").val( ui.item.label );
                 $("#'.$id.'").val( ui.item.id );
@@ -781,7 +775,7 @@ $(function(){
   	    source: function (query, process) {
   	    	$.ajax({
   	    		  type: "POST",
-  	    		  url: HTTP+"QrsGate/autocomplete3/'.$url_code.'/",
+  	    		  url: HTTP+"'.getQrsGatePath().'autocomplete3/'.$url_code.'/",
   	    		  data: "&query="+query,
   	    		  dataType: "JSON",
   	    		  async:true,
@@ -825,7 +819,7 @@ $(function(){
 	datumTokenizer: Bloodhound.tokenizers.obj.whitespace("value"),
 	queryTokenizer: Bloodhound.tokenizers.whitespace,
 	remote: {
-	  url: HTTP+"QrsGate/autocomplete3/'.$url_code.'/?q=%QUERY",
+	  url: HTTP+"'.getQrsGatePath().'autocomplete3/'.$url_code.'/?q=%QUERY",
 	  wildcard: "%QUERY"
 	}
 });
@@ -875,7 +869,7 @@ $(function(){
 	datumTokenizer: Bloodhound.tokenizers.obj.whitespace("value"),
 	queryTokenizer: Bloodhound.tokenizers.whitespace,
 	remote: {
-	  url: HTTP+"QrsGate/autocomplete3/'.$url_code.'/?q=%QUERY",
+	  url: HTTP+"'.getQrsGatePath().'autocomplete3/'.$url_code.'/?q=%QUERY",
 	  wildcard: "%QUERY"
 	}
 });
