@@ -4,3 +4,5 @@ vendor
 .phpintel
 application_example
 launch.json
+.idea
+application_example_v2

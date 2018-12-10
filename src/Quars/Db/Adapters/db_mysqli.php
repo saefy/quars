@@ -45,6 +45,7 @@ class db_mysqli implements db_interface{
 	}
 
 	private $ArrNumericTypeMap = array('int','decimal','money','search_field','file','checkbox','tinyint');
+	private $ArrDateTypeMap = array('date','datetime','timestamp');
 
 	/**
 	 *@package db_mysqli
@@ -308,7 +309,7 @@ db_type = mysql','html');
 		foreach($array_fields as $f_name=>$f_val){
 
 			if($f_name!=$id_field_name && trim($f_name)!=''){
-
+				$f_value = '';
 				$FieldType = isset($form_fields[$f_name]['Type'])?strtolower($form_fields[$f_name]['Type']):'';
 				$FieldTypeXp = explode('(', $FieldType);
 				if(count($FieldTypeXp)>1){ $FieldType = $FieldTypeXp[0];}
@@ -318,23 +319,23 @@ db_type = mysql','html');
 				if($FieldType=='password'){
 					// Exepcion password
 					if(trim($f_val)!=''){
-						$fields_vals .= "'".md5($f_val)."',";
-					}else{$fields_vals .= "'',";}
-				}elseif($FieldType=='date' && $this->dateformat_auto_convert){
-					// Exepcion date
+						$f_value = "'".md5($f_val)."'";
+					}else{$f_value = "''";}
+				}elseif(in_array($FieldType, $this->ArrDateTypeMap) && $this->dateformat_auto_convert){
+					// Exception date, timestamp, datetime, ... all date types
 					if($f_val===NULL || trim($f_val)==''){
-						$fields_vals .= " NULL ,";
+						$f_value = " NULL ";
 					}else{
-						$fields_vals .= "STR_TO_DATE('".$this->escape_string($f_val)."', '".DB_DATE_FORMAT."'),";
-					}
-				}elseif(($FieldType=='timestamp' || $FieldType=='datetime') && $this->dateformat_auto_convert){
-					// Exepcion date
-					if($f_val===NULL || trim($f_val)==''){
-						$fields_vals .= " NULL ,";
-					}else{
-						$f_val_date = substr($f_val, 0,10); // agregar fecha
-						$f_val_time = substr($f_val, 11); // agregar tiempo
-						$fields_vals .= "CONCAT(STR_TO_DATE('".$this->escape_string($f_val_date)."', '".DB_DATE_FORMAT."'),' ','".$f_val_time."'),";
+						
+						$f_val_datetime = $this->getDateObject($FieldType, $f_val);
+
+						if ($f_val_datetime !== FALSE) {
+							if($FieldType === 'date') {
+								$f_value = "'".$this->escape_string($f_val_datetime->format('Y-m-d'))."' ";
+							}else{
+								$f_value = "'".$this->escape_string($f_val_datetime->format('Y-m-d H:i:s'))."' ";
+							}
+						}
 					}
 				}elseif(in_array($FieldType, $this->ArrNumericTypeMap)){
 					// Exception numeric, int, money, ... all number types
@@ -346,16 +347,21 @@ db_type = mysql','html');
 							$v = '0';
 						}
 					}
-					$fields_vals .= "'".$v."',";
+					$f_value = "'".$v."'";
 				}else{
 					if($f_val===NULL){
-						$fields_vals .= " NULL ,";
+						$f_value .= " NULL ";
 					}else{
-						$fields_vals .= "'".$this->escape_string(stripslashes($f_val))."',";
+						$f_value .= "'".$this->escape_string(stripslashes($f_val))."'";
 					}
 
 				}
-				$fields_list .= ' `'.$f_name.'` ,';
+
+				if ($f_value !=='') {
+					$fields_vals .= $f_value.' ,';
+					$fields_list .= ' `'.$f_name.'` ,';
+				}
+				
 
 			}
 
@@ -374,13 +380,27 @@ db_type = mysql','html');
 		$sql = 'INSERT INTO '.$table.' ('.$primary_fields.''.$fields_list.')
   			   VALUES ('.$primary_vals.''.$fields_vals.')';
 
-
-
 		$rs = $this->query($sql);
 		return $rs;
 
 
 	}
+
+	private function getDateObject($FieldType, $f_val){
+		if($FieldType === 'date') {
+			$f_val_datetime = DateTime::createFromFormat(DATE_FORMAT, $f_val);
+			if (!$f_val_datetime){
+				$f_val_datetime = DateTime::createFromFormat('Y-m-d', $f_val);
+			}
+		}else{
+			$f_val_datetime = DateTime::createFromFormat(DATE_TIME_FORMAT, $f_val);
+			if (!$f_val_datetime){
+				$f_val_datetime = DateTime::createFromFormat('Y-m-d H:i:s', $f_val);
+			}
+		}
+		return $f_val_datetime;	
+	}
+
 
 	private function sanitize_float($v){
 		// replace comma sent by client.
@@ -397,8 +417,6 @@ db_type = mysql','html');
 	 *@since v0.3.1
 	 * */
 	public function update($table,$array_fields,$id_field_name,$form_fields){
-
-
 
 		$set_fields = '';
 
@@ -434,36 +452,22 @@ db_type = mysql','html');
 					if(trim($f_val)!=''){
 						$set_fields .= " `".$f_name."` = '".md5($f_val)."',";
 					}
-				}elseif($FieldType=='date' && $this->dateformat_auto_convert){
-					// Exepcion date
+				}elseif(in_array($FieldType, $this->ArrDateTypeMap) && $this->dateformat_auto_convert){
+					// Exception date, timestamp, datetime, ... all date types
 					if($f_val===NULL || trim($f_val)==''){
 						$set_fields .= " `".$f_name."` = NULL ,";
 					}else{
-						$set_fields .= " `".$f_name."` = STR_TO_DATE('".$this->escape_string($f_val)."', '".DB_DATE_FORMAT."'),";
+						$f_val_datetime = $this->getDateObject($FieldType, $f_val);
+						
+						if ($f_val_datetime !== FALSE) {
+							if($FieldType === 'date') {
+								$set_fields .= " `".$f_name."` = '".$this->escape_string($f_val_datetime->format('Y-m-d'))."',";
+							}else{
+								$set_fields .= " `".$f_name."` = '".$this->escape_string($f_val_datetime->format('Y-m-d H:i:s'))."',";
+							}
+						}
 					}
-				}elseif(($FieldType=='timestamp' || $FieldType=='datetime') && $this->dateformat_auto_convert){
-					// Exepcion timestamp
-					if($f_val===NULL || trim($f_val)==''){
-						$set_fields .= " `".$f_name."` = NULL ,";
-					}else{
-						$f_val_time = substr($f_val, 11); // agregar tiempo
-						$f_val_date = substr($f_val, 0,10);
 
-						/*
-						 echo $f_name.'=';
-						 echo $f_val_date;
-
-						 if(checkdate(substr($f_val_date, 5,2), substr($f_val_date, 8,2), substr($f_val_date, 0,4))){
-						 // es formato YYYY-mm-dd , DISTINTO DEL formato establecido en la configuracion
-						 // ALINEAR CON EL DE LA CONFIGURACION
-						 $f_val_date = date(DATE_FORMAT,strtotime($f_val_date));
-						 }else{
-							echo 'no es YYYY-mm-dd';
-							}*/
-
-						$set_fields .= " `".$f_name."` = CONCAT(STR_TO_DATE('".$this->escape_string($f_val_date)."', '".DB_DATE_FORMAT."'),' ','".$f_val_time."'),";
-
-					}
 				}elseif(in_array($FieldType, $this->ArrNumericTypeMap)){
 					// Exception numeric, int, money, ... all number types
 					$v = $this->sanitize_float($f_val);
@@ -490,20 +494,14 @@ db_type = mysql','html');
 		$set_fields = trim($set_fields,',');
 
 
-
 		if($WHERE!=''){
-
 			$SET = ' SET '.$set_fields;
 			$sql = 'UPDATE '.$table.' '.$SET.' '.$WHERE.'  LIMIT 1';
 			$rs = $this->query($sql);
-			
 		}else{
-
 			echo ' WHERE Required. Use: $db->set_where(" field = \'1\'") ';
 			die();
-
 		}
-
 
 		return $rs;
 
