@@ -194,7 +194,6 @@ class Load{
 			$view_file = 'app/Views/'.$view;
 			$view_file_path = SYSTEM_PATH_QRS.$view_file;
 			$view_content = file_get_contents($view_file_path);
-			// $view_content = $this->evalView($view_content, $data);
 		}
 		
 		if(app_config_is('utf8_encode', true)){
@@ -209,36 +208,6 @@ class Load{
 			return;
 		}
 	} // End Pre Process
-
-	private function evalView($f_view,$Arr = array()){
-		// Declarar Arrays
-		$ArrSearch = array();
-		$ArrRepl   = array();
-		// Array de variables enviado por funcion
-		if(count($Arr)>0){
-			foreach ($Arr as $k => $v){
-				$$k = $v;
-			}
-		}
-		// Array generado por PutContent
-		if(count($this->ViewContent)>0){
-			foreach ($this->ViewContent as $k => $v){
-				$ArrSearch[] = $k;
-				$ArrRepl[] = $v;
-			}
-		}
-		
-		$view_content = str_replace($ArrSearch, $ArrRepl, $f_view);
-		$ViewResult = '';
-		
-		// Returns result
-		ob_start();
-		eval('?>' . $view_content . '<?php ');
-		$ViewResult = ob_get_contents();
-		ob_end_clean();
-		
-		return $ViewResult;
-	}
 
 	/**
 	 *@package load
