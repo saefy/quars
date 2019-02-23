@@ -13,7 +13,7 @@ class Controller {
 	public $controller = 'index';
 	public $action = 'index';
 	public $only_ajax = false;
-	public $auto_run = true;
+	public $auto_run = false;
 
 	public $templateEngine = 'bladex';
 
