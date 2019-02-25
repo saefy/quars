@@ -262,9 +262,10 @@ class Load{
 
 			if($return==true){ ob_start(); }
 			
-			// require_once (SYSTEM_PATH_QRS.'App/Controllers/'.$url_rs['file_controller']);
 			$controller  = '\\App\\Controllers\\'.$url_rs['controller'];
 			$page = new $controller($url_rs);
+			$method = $url_rs['action'];
+            $page->$method();
 
 			if($return==true){
 				$html = ob_get_contents();
