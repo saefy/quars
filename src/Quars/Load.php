@@ -278,6 +278,30 @@ class Load{
 	} // end url
 
 	/**
+     * @desc Loads an internal url via ajax
+     * @param $url;
+     * @param $divId;
+     * @param $createDiv;
+     * @example when you need to load an internal url inside a view <b>{{Load::ajaxUrl('myaccount/general/','content-div')}}</b>
+     *
+     * */
+    public static function ajaxUrl($url, $divId, $createDiv=true){
+        if($createDiv){
+            ?><div id="<?php echo $divId?>">Cargando...</div><?php
+        }
+        ?>
+        <script>
+            $(function(){
+                <?php
+                $x = new \Quars\Libraries\Ajax('url', $divId ,'url:'.$url);
+                echo $x->render();
+                ?>
+            });
+        </script>
+        <?php
+    } // end ajaxUrl
+
+	/**
 	 * @package Load
 	 * @method formModel()
 	 * @desc Loads a form model (app/Models/forms/)
