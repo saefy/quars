@@ -95,7 +95,7 @@ function blank_header(){
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <title><?php echo fk_document_title();?></title>
 	<?php echo fk_css_load();?>
-	<script src="<?php echo fk_link();?>frontend/themes/saefy/js/jquery.js"></script>
+    <script src="<?php echo fk_link();?>frontend/js/libs/jquery/jquery-3.3.1.min.js"></script>
 	<?php echo fk_js_load();?>
 </head>
 <body>

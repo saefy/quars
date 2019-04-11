@@ -470,7 +470,7 @@ $(function(){
 						$html_fld .='<input id="cur-v-'.$field_id_html.'" type="hidden" value="'.$this->fields[$field].'"  />';
 					}elseif($display_as=='edit'){
 						$html_fld .='<input id="'.$field_id_html.'" name="'.$field_name_html.'" type="hidden" value="'.@$this->fields[$field].'" '.$Class.' '.@$ExtraAttributes.' />';
-						$html_fld .='<br><iframe src="'.fk_link().'FkMaster/upolader/'.$field_id_html.'/" name="ifrmupl-'.$field_id_html.'" style="width:95%;height:45px;" frameborder="0"></iframe>';
+						$html_fld .='<br><iframe src="'.fk_link().'QrsGate/upolader/'.$field_id_html.'/" name="ifrmupl-'.$field_id_html.'" style="width:95%;height:45px;" frameborder="0"></iframe>';
 
 						$file_data = '';
 						$ArUpl = new ActiveRecord('uploads');
@@ -815,7 +815,7 @@ $(function(){
 						datumTokenizer: Bloodhound.tokenizers.obj.whitespace("value"),
 						queryTokenizer: Bloodhound.tokenizers.whitespace,
 						remote: {
-						  url: HTTP+"FkMaster/autocompleteAppForm/'.$this->table.'/'.$field_id_html.'/?q=%QUERY",
+						  url: HTTP+"QrsGate/autocompleteAppForm/'.$this->table.'/'.$field_id_html.'/?q=%QUERY",
 						  wildcard: "%QUERY"
 						}
 					});
