@@ -470,7 +470,7 @@ $(function(){
 						$html_fld .='<input id="cur-v-'.$field_id_html.'" type="hidden" value="'.$this->fields[$field].'"  />';
 					}elseif($display_as=='edit'){
 						$html_fld .='<input id="'.$field_id_html.'" name="'.$field_name_html.'" type="hidden" value="'.@$this->fields[$field].'" '.$Class.' '.@$ExtraAttributes.' />';
-						$html_fld .='<br><iframe src="'.fk_link().'QrsGate/upolader/'.$field_id_html.'/" name="ifrmupl-'.$field_id_html.'" style="width:95%;height:45px;" frameborder="0"></iframe>';
+						$html_fld .='<br><iframe src="'.fk_link().'QrsGate/uploader/'.$field_id_html.'/" name="ifrmupl-'.$field_id_html.'" style="width:95%;height:45px;" frameborder="0"></iframe>';
 
 						$file_data = '';
 						$ArUpl = new ActiveRecord('uploads');
@@ -492,7 +492,7 @@ $(function(){
 						}
 
 						//$html_fld .='<div id="ico-'.$field_id_html.'">'.$file_data.'</div>';
-						$html_fld .='<div id="ico-'.$field_id_html.'"><span>'.$file_data.'</span> <a class="btn btn-danger btn-xs" href="javascript:void(0)" onclick="if(confirm(\'Remover?\')){$(\'#'.$field_id_html.'\').val(\'\');$(\'#ico-'.$field_id_html.' span\').html(\'\');$(\'#'.$field_id_html.'\').change();}"><i class="fa fa-trash-o"></i></a></div>';
+						$html_fld .='<div id="ico-'.$field_id_html.'"><span>'.$file_data.'</span> <a class="btn btn-danger btn-sm" href="javascript:void(0)" onclick="if(confirm(\'Remover?\')){$(\'#'.$field_id_html.'\').val(\'\');$(\'#ico-'.$field_id_html.' span\').html(\'\');$(\'#'.$field_id_html.'\').change();}"><i class="fas fa-trash"></i></a></div>';
 					}elseif($display_as=='read-only'){
 						$html_fld .='<input id="'.$field_id_html.'" name="'.$field_name_html.'" type="hidden" value="'.@$this->fields[$field].'" '.$Class.' '.@$ExtraAttributes.' />';
 						$file_data = '';

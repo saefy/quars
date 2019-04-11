@@ -622,7 +622,7 @@ function fk_file_field($id,$name,$value,$onclick=null,$cssExtra='',$mode='edit',
 
 	}
 
-	$html_fld .='<div id="ico-'.$id.'"><span>'.$file_data.'</span> <a class="btn btn-danger btn-xs" href="javascript:void(0)" onclick="if(confirm(\'Remover?\')){$(\'#'.$id.'\').val(\'\');$(\'#ico-'.$id.' span\').html(\'\');$(\'#'.$id.'\').change();}"><i class="fa fa-trash-o"></i></a></div>';
+	$html_fld .='<div id="ico-'.$id.'"><span>'.$file_data.'</span> <a class="btn btn-danger btn-sm" href="javascript:void(0)" onclick="if(confirm(\'Remover?\')){$(\'#'.$id.'\').val(\'\');$(\'#ico-'.$id.' span\').html(\'\');$(\'#'.$id.'\').change();}"><i class="fas fa-trash"></i></a></div>';
 
 	return $html_fld;
 }
