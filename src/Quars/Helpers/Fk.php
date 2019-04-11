@@ -601,7 +601,7 @@ function fk_file_field($id,$name,$value,$onclick=null,$cssExtra='',$mode='edit',
 
 	if($mode=='edit'){
 		$html_fld .='<input id="'.$id.'" name="'.$name.'" type="hidden" value="'.$value.'" class="'.$cssExtra.'" />';
-		$html_fld .='<br><iframe src="'.fk_link().getQrsGatePath().'upolader/'.$id.'/" name="ifrmupl-'.$id.'" style="width:95%;height:45px;" frameborder="0"></iframe>';
+		$html_fld .='<br><iframe src="'.fk_link().getQrsGatePath().'uploader/'.$id.'/" name="ifrmupl-'.$id.'" style="width:95%;height:45px;" frameborder="0"></iframe>';
 	}
 
 	$file_data = '';
