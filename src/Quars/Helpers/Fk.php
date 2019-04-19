@@ -1429,8 +1429,8 @@ function fk_form_var($val,$type='',$url_p=''){
 	$url = encode($url);
 
 	$get_or_post = true;
-
-	$conf_code = 'FORMVAL:'.$_SESSION['id_usuario'].':'.$url.':'.$val;
+    $id_usuario = $_SESSION['id_usuario'] ?? '0';
+	$conf_code = 'FORMVAL:'.$id_usuario.':'.$url.':'.$val;
 
 	// get or post first
 	if(isset($_POST[$val])){

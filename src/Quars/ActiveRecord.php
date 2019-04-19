@@ -15,7 +15,7 @@ class ActiveRecord{
 	public  $fields = array();
 	public  $form_fields = array();
 	public  $num_rows = 0;
-	public  $table = '';
+	protected  $table = '';
 	public  $id_field_name = '';
 	public  $db_type;  // db_type, definido por defecto en config/config.ini
 	private $db_obj; // Database de acuerdo a db_type
@@ -54,10 +54,13 @@ class ActiveRecord{
 	 //------------------------------------------
 
 	 // TABLE
-	 if($table==''){
-	 	$this->table = $this->get_table();
-	 }else{$this->table = $table;}
-
+     if($this->table==''){
+        if($table==''){
+            $this->table = $this->get_table();
+        }else{
+            $this->table = $table;
+        }
+     }
 
 	 // obtiene la estructura de la tabla si no esta definida
 	 if(count($this->form_fields)==0){
@@ -658,8 +661,8 @@ $(function(){
 		 	$Class = 'class=" '.@$CssName.'"';
 		 	if($access==TRUE){
 					if($display_as=='view-edit' || $display_as == 'edit'){
-						$html_fld .='Si<input id="'.$field_id_html.'_1" name="'.$field_name_html.'" '.$chk['1'].' type="radio" value="1" '.$Class.' '.@$ExtraAttributes.'>
-             No<input id="'.$field_id_html.'_0" name="'.$field_name_html.'" '.$chk['0'].' type="radio" value="0" '.$Class.' '.@$ExtraAttributes.'>';
+						$html_fld .='Si <input id="'.$field_id_html.'_1" name="'.$field_name_html.'" '.$chk['1'].' type="radio" value="1" '.$Class.' '.@$ExtraAttributes.'>
+             No <input id="'.$field_id_html.'_0" name="'.$field_name_html.'" '.$chk['0'].' type="radio" value="0" '.$Class.' '.@$ExtraAttributes.'>';
 					}elseif($display_as=='read-only'){
 						$html_fld .=$chk_read_val;
 					}
@@ -886,7 +889,8 @@ $(function(){
 	 *@since v0.1 beta
 	 * */
 	public function get_table(){
-		
+        if($this->table!=''){ return $this->table;}
+
 		$class = get_class($this);
 		$xp_class = explode('\\',$class);
 		$len = count($xp_class);
@@ -996,11 +1000,22 @@ $(function(){
 	 * @package db_record
 	 * @method  and_condition()
 	 * @desc sets sql AND contition
-	 * @since v0.1 beta
 	 * */
 	public function and_condition($and){
 		return $this->SqlAnd=$and;
 	}
+
+    /**
+     * @package ActiveRecord
+     * @method  loadTableDefinition()
+     * @desc loads table schema from cache file
+     * */
+    protected function loadTableDefinition($path) {
+        $model = include $path . $this->get_table().'.def.php';
+        $this->id_field_name = $model['_primary_key'];
+        $this->form_fields = $model;
+        unset($this->form_fields['_primary_key']);
+    }
 
 
 }
