@@ -28,6 +28,7 @@ class ActiveRecord{
 	public $prefix_field = ''; // Prefix field
 	private $inserted_id = null;
 
+    public $CustomFormFields = [];
 
 	/**
 	 * @package db_record :: Active Record
@@ -859,19 +860,35 @@ $(function(){
 
 				break;
 		 default:
-		 	$Class = 'class="txt form-control '.@$CssName.'"';
-		 	if($access==TRUE){
-					if($display_as=='view-edit'){
-						$html_fld .='<div class="fld" onclick="appForm_updfldTxt({id:\''.$field_id_html.'\'})"><input style="display:none" id="'.$field_id_html.'" name="'.$field_name_html.'" type="text" value="'.@$this->fields[$field].'" '.$Class.' '.@$ExtraAttributes.' />';
-						$html_fld .='<span id="val-'.$field_id_html.'">'.@$this->fields[$field].'</span>&nbsp;<span class="ui-icon ui-icon-gear"></span></div>';
-						$html_fld .='<input id="cur-v-'.$field_id_html.'" type="hidden" value="'.@$this->fields[$field].'"  />';
+             if(isset($this->CustomFormFields[$type])){
+                 $d = [
+                     'display_as' => $display_as,
+                     'access' => $access,
+                     'type' => $type,
+                     'CssName' => $CssName,
+                     'Class' => $Class ?? '',
+                     'id' => $field_id_html,
+                     'name' => $field_name_html,
+                     'value' => $this->fields[$field],
+                     'ExtraAttributes' => $ExtraAttributes,
+                     'form_field' => $this->form_fields[$field]
+                 ];
+                 $html_fld .= $this->CustomFormFields[$type]['func']($d);
+             }else{
+                 $Class = 'class="txt form-control '.@$CssName.'"';
+                 if($access==TRUE){
+                     if($display_as=='view-edit'){
+                         $html_fld .='<div class="fld" onclick="appForm_updfldTxt({id:\''.$field_id_html.'\'})"><input style="display:none" id="'.$field_id_html.'" name="'.$field_name_html.'" type="text" value="'.@$this->fields[$field].'" '.$Class.' '.@$ExtraAttributes.' />';
+                         $html_fld .='<span id="val-'.$field_id_html.'">'.@$this->fields[$field].'</span>&nbsp;<span class="ui-icon ui-icon-gear"></span></div>';
+                         $html_fld .='<input id="cur-v-'.$field_id_html.'" type="hidden" value="'.@$this->fields[$field].'"  />';
 
-					}elseif($display_as=='edit'){
-						$html_fld .='<input id="'.$field_id_html.'" name="'.$field_name_html.'" type="text" value="'.@$this->fields[$field].'" '.$Class.' '.@$ExtraAttributes.' />';
-					}elseif($display_as=='read-only'){
-						$html_fld .='<span class="form-control disabled" disabled="disabled" >'.$this->fields[$field].'</span><input id="'.$field_id_html.'" name="'.$field_name_html.'" type="hidden" value="'.@$this->fields[$field].'" '.$Class.' '.@$ExtraAttributes.' />';
-					}
-		 	}
+                     }elseif($display_as=='edit'){
+                         $html_fld .='<input id="'.$field_id_html.'" name="'.$field_name_html.'" type="text" value="'.@$this->fields[$field].'" '.$Class.' '.@$ExtraAttributes.' />';
+                     }elseif($display_as=='read-only'){
+                         $html_fld .='<span class="form-control disabled" disabled="disabled" >'.$this->fields[$field].'</span><input id="'.$field_id_html.'" name="'.$field_name_html.'" type="hidden" value="'.@$this->fields[$field].'" '.$Class.' '.@$ExtraAttributes.' />';
+                     }
+                 }
+             }
 		 	break;
 		}
 
