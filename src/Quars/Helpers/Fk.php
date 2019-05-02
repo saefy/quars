@@ -626,14 +626,11 @@ function fk_file_field($id,$name,$value,$onclick=null,$cssExtra='',$mode='edit',
 
 	return $html_fld;
 }
-function fk_get_image($id){
-
-	$file_data = '';
-	$ArUpl = new \Quars\ActiveRecord('uploads');
-	$totUpl = $ArUpl->find($id);
-
-	return http_uploads().$ArUpl->fields['archivo'];
-
+function fk_get_image($id) {
+    $ArUpl = new \Quars\ActiveRecord('uploads');
+    $ArUpl->setProjection(['folder','archivo']);
+    $ArUpl->find($id);
+    return http_uploads().$ArUpl->fields['folder'].'/'.$ArUpl->fields['archivo'];
 }
 /**
  * @desc File field Object

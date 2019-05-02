@@ -8,27 +8,30 @@
 namespace Quars;
 
 global $db;
-if (!$db) {  \Quars\Load::database(); }
+if (!$db) {
+    load::database();
+}
 
-class ActiveRecord{
-
-	public  $fields = array();
-	public  $form_fields = array();
-	public  $num_rows = 0;
-	protected  $table = '';
-	public  $id_field_name = '';
-	public  $db_type;  // db_type, definido por defecto en config/config.ini
-	private $db_obj; // Database de acuerdo a db_type
-	private $FindMode = ''; // Find mode: [first|last|next|prev]
-	private $SqlWhere = ''; // SQL WHERE
-	public $SqlAnd = ''; // SQL AND
-	public $field_mode = 'view-edit'; // update | view-edit
-	public $error_code = ''; // database error code
-	public $useHtmlEntities_onField = true; // display field results with htmlentities()
-	public $prefix_field = ''; // Prefix field
-	private $inserted_id = null;
+class ActiveRecord
+{
+    public $fields = array();
+    public $form_fields = array();
+    public $num_rows = 0;
+    protected $table = '';
+    public $id_field_name = '';
+    public $db_type;  // db_type, definido por defecto en config/config.ini
+    private $db_obj; // Database de acuerdo a db_type
+    private $FindMode = ''; // Find mode: [first|last|next|prev]
+    private $SqlWhere = ''; // SQL WHERE
+    public $SqlAnd = ''; // SQL AND
+    public $field_mode = 'view-edit'; // update | view-edit
+    public $error_code = ''; // database error code
+    public $useHtmlEntities_onField = true; // display field results with htmlentities()
+    public $prefix_field = ''; // Prefix field
+    private $inserted_id = null;
 
     public $CustomFormFields = [];
+    private $projection = '*';
 
 	/**
 	 * @package db_record :: Active Record
@@ -267,7 +270,7 @@ class ActiveRecord{
 				break;
 		}
 			
-		$sql = 'SELECT * FROM '.$this->table.' '.$WHERE;
+		$sql = 'SELECT '.$this->projection.' FROM '.$this->table.' '.$WHERE;
 			
 
 		$this->db_obj->query_assoc($sql);
@@ -284,7 +287,20 @@ class ActiveRecord{
 			
 			
 			
-	} // function get()
+	} // function get_fields()
+
+    /**
+     *@package ActiveRecord
+     *@method setProjection()
+     *@desc sets sql query projection
+     *@since v1.1.13
+     * */
+    public function setProjection($projection) {
+        if (is_array($projection)) {
+            $projection = join(',', $projection);
+        }
+        $this->projection = $projection;
+    }
 
 	/**
 	 *@package db_record
@@ -295,11 +311,6 @@ class ActiveRecord{
 	public function print_form_field($field,$CssName = '',$ExtraAttributes ='' ,$encode_fields =FALSE,$access=TRUE,$read_only=FALSE,$code=''){
 		$html_fld = '';
 
-
-
-
-
-
 		if($encode_fields==TRUE){
 			$field_id_html = 'fkf_'.encode($field.$code);
 			$field_name_html = encode($field.$code);
@@ -307,8 +318,6 @@ class ActiveRecord{
 			$field_id_html = $field.$code;
 			$field_name_html = $field.$code;
 		}
-
-
 
 		$original_type = $this->form_fields[$field]['Type'];
 		$type_x = explode("(",$original_type);
@@ -861,19 +870,21 @@ $(function(){
 				break;
 		 default:
              if(isset($this->CustomFormFields[$type])){
-                 $d = [
-                     'display_as' => $display_as,
-                     'access' => $access,
-                     'type' => $type,
-                     'CssName' => $CssName,
-                     'Class' => $Class ?? '',
-                     'id' => $field_id_html,
-                     'name' => $field_name_html,
-                     'value' => $this->fields[$field],
-                     'ExtraAttributes' => $ExtraAttributes,
-                     'form_field' => $this->form_fields[$field]
-                 ];
-                 $html_fld .= $this->CustomFormFields[$type]['func']($d);
+                 if (is_callable($this->CustomFormFields[$type])) {
+                     $d = [
+                         'display_as' => $display_as,
+                         'access' => $access,
+                         'type' => $type,
+                         'CssName' => $CssName,
+                         'Class' => $Class ?? '',
+                         'id' => $field_id_html,
+                         'name' => $field_name_html,
+                         'value' => $this->fields[$field],
+                         'ExtraAttributes' => $ExtraAttributes,
+                         'form_field' => $this->form_fields[$field]
+                     ];
+                     $html_fld .= $this->CustomFormFields[$type]($d);
+                 }
              }else{
                  $Class = 'class="txt form-control '.@$CssName.'"';
                  if($access==TRUE){
