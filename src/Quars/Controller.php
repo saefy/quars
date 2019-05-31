@@ -359,4 +359,14 @@ class '.get_class($this).' extends Controller {
 		return (isset($this->PermaLinkVars[$position])? $this->PermaLinkVars[$position]:'');
 	}
 
+	/**
+	*@package Controller
+	*@method jsonResponse($response);
+	* */
+	public function jsonResponse($response) {
+		header('Content-Type: application/json');
+		echo json_encode($response);
+		return;
+	}
+
 }
