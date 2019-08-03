@@ -1635,35 +1635,31 @@ function fk_define($name,$value){
 
 function fk_pdf($html,$return=false,$args=array()){
 
-	Load::library('dompdf/dompdf_config.inc');
+    if (!class_exists('\Dompdf\Dompdf')) {
+        echo 'Dompdf not found. Please install it with composer:<br>';
+        echo '<pre>composer require dompdf/dompdf</pre>';
+        return false;
+    }
 
-		if ( isset( $html )  ) {
+    if ( isset( $html )  ) {
+        if ( get_magic_quotes_gpc() )
+            $html = stripslashes($html);
 
-		  if ( get_magic_quotes_gpc() )
-		    $html = stripslashes($html);
+        $orientation = 'portrait';
+        if(isset($args['orientation'])){ $orientation = $args['orientation']; }
 
-		   $orientation = 'portrait';
-		   if(isset($args['orientation'])){ $orientation = $args['orientation']; }
-
-		  $dompdf = new DOMPDF();
-		  $dompdf->load_html($html);
-		  $dompdf->set_paper('letter', $orientation);
-		  $dompdf->render();
-
-		  if($return){
-		  	return $dompdf->output();
-		  }else{
-		  	// send stream to screen
-		  	$dompdf->stream("dompdf_out.pdf", array("Attachment" => false));
-			exit(0);
-
-		  }
-
-
-
-
-		}
-
+        $dompdf = new \Dompdf\Dompdf();
+        $dompdf->loadHtml($html);
+        $dompdf->setPaper('letter', $orientation);
+        $dompdf->render();
+        if($return){
+            return $dompdf->output();
+        }else{
+            // send stream to screen
+            $dompdf->stream('dompdf_out.pdf', array("Attachment" => false));
+            //exit(0);
+        }
+    }
 }
 
 function getRealPOST() {
