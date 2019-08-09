@@ -1648,7 +1648,7 @@ function fk_pdf($html,$return=false,$args=array()){
         $orientation = 'portrait';
         if(isset($args['orientation'])){ $orientation = $args['orientation']; }
 
-        $dompdf = new \Dompdf\Dompdf();
+        $dompdf = new \Dompdf\Dompdf(['enable_remote'=> true]);
         $dompdf->loadHtml($html);
         $dompdf->setPaper('letter', $orientation);
         $dompdf->render();
