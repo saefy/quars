@@ -398,7 +398,7 @@ class Quars {
 		self::read_config_file('database');
 
 		// Load constants
-		include(SYSTEM_PATH_QRS.'app/config/app.php');
+		include(SYSTEM_PATH_QRS.'App/Config/app.php');
 		
 		//--------------------
 		// Set view,controler & model files variable
@@ -443,11 +443,11 @@ class Quars {
 		$GLOBALS['APP_LANGUAGE']  = $_SESSION['language'] ?? $DEFAULT_LANGUAGE ;
 
 		// autoload: Execute on load 
-		include(SYSTEM_PATH_QRS.'app/config/autoload.php');
+		include(SYSTEM_PATH_QRS.'App/Config/autoload.php');
 	} // read_config
 
 	private static function read_config_file($FILE){
-		$cnf = include(SYSTEM_PATH_QRS.'app/config/'.$FILE.'.php');
+		$cnf = include(SYSTEM_PATH_QRS.'App/Config/'.$FILE.'.php');
 		$GLOBALS['QRS'][$FILE] = $cnf;
 		/*
 		$subsection = false;
