@@ -319,7 +319,7 @@ db_type = mysql','html');
 				if($FieldType=='password'){
 					// Exepcion password
 					if(trim($f_val)!=''){
-						$f_value = "'".md5($f_val)."'";
+						$f_value = "'".password_hash($f_val, PASSWORD_DEFAULT)."'";
 					}else{$f_value = "''";}
 				}elseif(in_array($FieldType, $this->ArrDateTypeMap) && $this->dateformat_auto_convert){
 					// Exception date, timestamp, datetime, ... all date types
@@ -450,7 +450,7 @@ db_type = mysql','html');
 				if($FieldType=='password'){
 					// Exepcion password
 					if(trim($f_val)!=''){
-						$set_fields .= " `".$f_name."` = '".md5($f_val)."',";
+						$set_fields .= " `".$f_name."` = '".password_hash($f_val, PASSWORD_DEFAULT)."',";
 					}
 				}elseif(in_array($FieldType, $this->ArrDateTypeMap) && $this->dateformat_auto_convert){
 					// Exception date, timestamp, datetime, ... all date types
