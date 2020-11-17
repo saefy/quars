@@ -4,6 +4,7 @@
  *
  * @package  Quars
  * @author   Miguel Mendoza <mmendoza000@gmail.com>
+ * @version 1.3.4
  */
  
 use Quars\QrsException;
@@ -54,7 +55,6 @@ class db_mysqli implements db_interface{
 	 *@since v0.1 beta
 	 * */
 	public function connect($p_host = NULL,$p_user = NULL,$p_pass = NULL,$p_db = NULL) {
-
 		$H = isset($p_host)? $p_host : self::$host;
 		$U = isset($p_user)? $p_user : self::$user;
 		$P = isset($p_pass)? $p_pass : self::$pass;
@@ -62,23 +62,19 @@ class db_mysqli implements db_interface{
 		if(class_exists('Logger')){
 			$Logger = Logger::getRootLogger();
 		}
-
-		//$Logger->debug('Connect ::: '.$H.'@'.$D.' '.fk_get('url'));
-
 		if(!$this->mysqli){
 			$this->mysqli = @new mysqli($H, $U, $P, $D);
 			if(!isset($_SESSION['num_conn'])){$_SESSION['num_conn'] = 0;}
 			$_SESSION['num_conn']++;
-			if(class_exists('Logger')){
-				$Logger->debug('DoConnect ::: '.$H.'@'.$D.' ('.$_SESSION['num_conn'].')');
+			if(class_exists('Logger') && $_SESSION['num_conn'] > 1){
+				$link = fk_get_path();
+				$Logger->debug('DoConnect ::: '.$H.'@'.$D.' ('.$_SESSION['num_conn'].')'.$link);
 			}
 		}else{
 			if(class_exists('Logger')){
 				$Logger->debug('DoNotConnect ::: '.$H.'@'.$D.' ');
 			}
 		}
-
-
 		if($this->mysqli->connect_error){
 			try{
 				throw new QrsException("Error al conectar a la db ");
@@ -99,9 +95,7 @@ db_type = mysql','html');
 		}
 	}
 	public static function verfy_connection($p_host = NULL,$p_user = NULL,$p_pass = NULL,$p_db = NULL) {
-
 		error_reporting(0);
-
 		$error = false;
 		$error_code = '';
 		$error_desc = '';
@@ -121,16 +115,11 @@ db_type = mysql','html');
 			$error_desc = $mysqli->connect_error;
 		}
 
-
-
-
 		$arr_error['error'] = $error;
 		$arr_error['code'] = $error_code;
 		$arr_error['desc'] = $error_desc;
 
-
 		return $arr_error;
-
 	}
 
 	/**
@@ -142,7 +131,7 @@ db_type = mysql','html');
 	public function close() {
 		if(class_exists('Logger')){
 			$Logger = Logger::getRootLogger();
-			$Logger->debug('CloseDB Conn'.fk_get('url'));
+			$Logger->debug('CloseDB Conn'.fk_get_path());
 		}
 		if(self::$is_connected){
 			if($this->mysqli){
@@ -158,12 +147,24 @@ db_type = mysql','html');
 	 *@since v0.1 beta
 	 *@return bool & Populates $this->resource
 	 * */
-	public function query($query){
-
+	public function query($query, $params = []){
 		if(!$this->mysqli){
 			$this->connect();
 		}
-
+		// Replace tokens
+		if (count($params) > 0) {
+			$replaceTokens = function($str, $args = []){
+			global $db;
+				foreach ($args as $value) {
+					$pos = strpos($str, '?');
+					if ($pos === false) { break;}
+					$str = preg_replace('/\?/', $db->escape_string($value), $str, 1);
+				}
+				return $str;
+			};
+			$query = $replaceTokens($query, $params);
+		}
+		
 		$this->sql_query = $query ;
 
 		if($this->resource = $this->mysqli->query($query)){
@@ -193,12 +194,7 @@ db_type = mysql','html');
 				}
 				return FALSE;
 			}
-
-
-
 		} // End else
-
-
 	}
 
 	/**
@@ -207,10 +203,9 @@ db_type = mysql','html');
 	 *@desc Send a MySQL query in assoc mode
 	 *@since v0.1 beta
 	 * */
-	public function query_assoc($query){
+	public function query_assoc($query, $params = []){
 		$this->query_is_assoc = true;
-		$this->query($query);
-
+		$this->query($query, $params);
 	}
 
 	/**
@@ -219,10 +214,9 @@ db_type = mysql','html');
 	 *@desc Send a MySQL query in assoc mode
 	 *@since v0.1 beta
 	 * */
-	public function query_array($query){
+	public function query_array($query, $params = []){
 		$this->query_is_assoc = false;
-		$this->query($query);
-
+		$this->query($query, $params);
 	}
 
 	/**
@@ -234,7 +228,6 @@ db_type = mysql','html');
 	public function num_rows($rs = null){
 		$Resource = ( $rs!=NULL? $rs : $this->resource);
 		return $Resource->num_rows;
-
 	}
 	/**
 	 *@package db_mysqli
@@ -243,13 +236,10 @@ db_type = mysql','html');
 	 *@since v0.1 beta
 	 * */
 	public function next($rs = ''){
-
 		$Resource = ( $rs!=''? $rs : $this->resource);
-
 		if($this->query_is_assoc==true){
 			return $Resource->fetch_assoc();
 		}else{return $Resource->fetch_array();}
-
 	}
 	/**
 	 *@package db_mysqli
@@ -281,7 +271,6 @@ db_type = mysql','html');
 	 *@since v0.1 beta
 	 * */
 	public function describe_table($table){
-
 		$t_fields = array();
 		$sql = ' DESC '.$table.';';
 		$this->query_assoc($sql);
@@ -302,14 +291,12 @@ db_type = mysql','html');
 	} // describe_table
 
 	public function insert($table,$array_fields,$id_field_name,$form_fields){
-
 		$fields_list = '';
 		$fields_vals = '';
 
 		foreach($array_fields as $f_name=>$f_val){
 
 			if($f_name!=$id_field_name && trim($f_name)!=''){
-				$f_value = '';
 				$FieldType = isset($form_fields[$f_name]['Type'])?strtolower($form_fields[$f_name]['Type']):'';
 				$FieldTypeXp = explode('(', $FieldType);
 				if(count($FieldTypeXp)>1){ $FieldType = $FieldTypeXp[0];}
@@ -317,54 +304,49 @@ db_type = mysql','html');
 				$canBeNull = ($form_fields[$f_name]['Null'] === 'YES') ? true : false;
 
 				if($FieldType=='password'){
+					Load::helper('password_hasher');
 					// Exepcion password
 					if(trim($f_val)!=''){
-						$f_value = "'".password_hash($f_val, PASSWORD_DEFAULT)."'";
-					}else{$f_value = "''";}
+						$fields_vals .= "'".password_hasher($f_val)."',";
+					}else{$fields_vals .= "'',";}
 				}elseif(in_array($FieldType, $this->ArrDateTypeMap) && $this->dateformat_auto_convert){
 					// Exception date, timestamp, datetime, ... all date types
 					if($f_val===NULL || trim($f_val)==''){
-						$f_value = " NULL ";
+						$fields_vals .= " NULL ,";
 					}else{
-						
 						$f_val_datetime = $this->getDateObject($FieldType, $f_val);
-
 						if ($f_val_datetime !== FALSE) {
 							if($FieldType === 'date') {
-								$f_value = "'".$this->escape_string($f_val_datetime->format('Y-m-d'))."' ";
+								$fields_vals .= "'".$this->escape_string($f_val_datetime->format('Y-m-d'))."' ,";
 							}else{
-								$f_value = "'".$this->escape_string($f_val_datetime->format('Y-m-d H:i:s'))."' ";
+								$fields_vals .= "'".$this->escape_string($f_val_datetime->format('Y-m-d H:i:s'))."' ,";
 							}
+						}else{
+							$fields_vals .= " NULL ,";
 						}
 					}
 				}elseif(in_array($FieldType, $this->ArrNumericTypeMap)){
 					// Exception numeric, int, money, ... all number types
 					$v = $this->sanitize_float($f_val);
-					if($v === ''){
+
+					if($v === '' || $v === null){
 						if($canBeNull){
 							$v = 'NULL';
 						}else{
 							$v = '0';
 						}
 					}
-					$f_value = "'".$v."'";
+					$fields_vals .= "".$v." ,";
 				}else{
 					if($f_val===NULL){
-						$f_value .= " NULL ";
+						$fields_vals .= " NULL ,";
 					}else{
-						$f_value .= "'".$this->escape_string(stripslashes($f_val))."'";
+						$fields_vals .= "'".$this->escape_string($f_val)."',";
 					}
 
 				}
-
-				if ($f_value !=='') {
-					$fields_vals .= $f_value.' ,';
-					$fields_list .= ' `'.$f_name.'` ,';
-				}
-				
-
+				$fields_list .= ' `'.$f_name.'` ,';
 			}
-
 		}
 
 		$fields_list = trim($fields_list,',');
@@ -382,8 +364,16 @@ db_type = mysql','html');
 
 		$rs = $this->query($sql);
 		return $rs;
+	}
 
+	private function sanitize_float($v){
+	    if($v===null){return $v;}
 
+		// replace comma sent by client.
+		$v = floatval($this->escape_string(stripslashes(str_replace(',', '', $v))));
+		// Replace comma generated by float server funcion from format 999,99 
+		$v = str_replace(',', '.', $v);
+		return $v;
 	}
 
 	private function getDateObject($FieldType, $f_val){
@@ -401,15 +391,6 @@ db_type = mysql','html');
 		return $f_val_datetime;	
 	}
 
-
-	private function sanitize_float($v){
-		// replace comma sent by client.
-		$v = floatval($this->escape_string(stripslashes(str_replace(',', '', $v))));
-		// Replace comma generated by float server funcion from format 999,99 
-		$v = str_replace(',', '.', $v);
-		return $v;
-	}
-
 	/**
 	 *@package db_mysqli
 	 *@method update()
@@ -417,22 +398,16 @@ db_type = mysql','html');
 	 *@since v0.3.1
 	 * */
 	public function update($table,$array_fields,$id_field_name,$form_fields){
-
 		$set_fields = '';
-
 		$WHERE = '';
-
 		if( $this->sql_where != ''){
 			$WHERE = ' WHERE ( '.$this->sql_where.' ) ';
-
 		}else{
-
 			if($id_field_name==NULL){
 				$form_fields = $this->describe_table($table);
 
 				$id_field_name = isset($this->primary_key_id['Field'])?$this->primary_key_id['Field']:NULL;
 			}
-
 			if($id_field_name!=NULL){
 				$WHERE = ' WHERE '.$id_field_name.' = \''.$array_fields[$id_field_name].'\' ';
 			}
@@ -450,7 +425,8 @@ db_type = mysql','html');
 				if($FieldType=='password'){
 					// Exepcion password
 					if(trim($f_val)!=''){
-						$set_fields .= " `".$f_name."` = '".password_hash($f_val, PASSWORD_DEFAULT)."',";
+						Load::helper('password_hasher');
+						$set_fields .= " `".$f_name."` = '".password_hasher($f_val)."',";
 					}
 				}elseif(in_array($FieldType, $this->ArrDateTypeMap) && $this->dateformat_auto_convert){
 					// Exception date, timestamp, datetime, ... all date types
@@ -458,20 +434,20 @@ db_type = mysql','html');
 						$set_fields .= " `".$f_name."` = NULL ,";
 					}else{
 						$f_val_datetime = $this->getDateObject($FieldType, $f_val);
-						
 						if ($f_val_datetime !== FALSE) {
 							if($FieldType === 'date') {
 								$set_fields .= " `".$f_name."` = '".$this->escape_string($f_val_datetime->format('Y-m-d'))."',";
 							}else{
 								$set_fields .= " `".$f_name."` = '".$this->escape_string($f_val_datetime->format('Y-m-d H:i:s'))."',";
 							}
+						}else{
+							$set_fields .= " `".$f_name."` = NULL ,";
 						}
 					}
-
 				}elseif(in_array($FieldType, $this->ArrNumericTypeMap)){
 					// Exception numeric, int, money, ... all number types
 					$v = $this->sanitize_float($f_val);
-					if($v === ''){
+					if($v === '' || $v === null){
 						if($canBeNull){
 							$v = 'NULL';
 						}else{
@@ -484,16 +460,12 @@ db_type = mysql','html');
 					if($f_val===NULL){
 						$set_fields .= " `".$f_name."` = NULL ,";
 					}else{
-						$set_fields .= " `".$f_name."` = '".$this->escape_string(stripslashes($f_val))."',";
+						$set_fields .= " `".$f_name."` = '".$this->escape_string($f_val)."',";
 					}
-
 				}
-
 			}
 		}
 		$set_fields = trim($set_fields,',');
-
-
 		if($WHERE!=''){
 			$SET = ' SET '.$set_fields;
 			$sql = 'UPDATE '.$table.' '.$SET.' '.$WHERE.'  LIMIT 1';
@@ -502,9 +474,7 @@ db_type = mysql','html');
 			echo ' WHERE Required. Use: $db->set_where(" field = \'1\'") ';
 			die();
 		}
-
 		return $rs;
-
 	}
 
 
@@ -515,13 +485,10 @@ db_type = mysql','html');
 	 *@since v0.1 beta
 	 * */
 	public function fetch_array($rs = ''){
-
 		$Resource = ( $rs!=''? $rs : $this->resource);
-
 		if($this->query_is_assoc==true){
 			return $Resource->fetch_assoc();
 		}else{return $Resource->fetch_array();}
-
 	} // fetch_array(){
 
 	/**
@@ -623,42 +590,29 @@ db_type = mysql','html');
 	 *@since v0.3.1
 	 * */
 	public function get_sql_string(){
-
 		$sql = ' SELECT ';
 		$sql .= ($this->sql_select_distinct!='') ? ' DISTINCT '.$this->sql_select_distinct : $this->sql_select;
 		$sql .= ' FROM '.$this->sql_table;
-
 		if(trim($this->sql_where)!=''){
 			$sql .= ' WHERE ('.$this->sql_where.')';
 		}else{
 			$sql .= ' WHERE (1=1) ';
 		}
-
-
-
 		if(trim($this->sql_and)!=''){
 			$sql .= ' '.$this->sql_and;
 		}
-
-
-
 		if(trim($this->sql_group_by)!=''){
 			$sql .= ' GROUP BY '.$this->sql_group_by;
 		}
-
 		if(count($this->sql_order_by)>0){
 			$this->sql_order_by = implode($this->sql_order_by, ', ');
 			$sql .= ' ORDER BY '.$this->sql_order_by.'';
 		}
-
-
 		if(trim($this->sql_limit)!=''){
 			$sql .= ' LIMIT  '.$this->sql_limit;
 		}
 
-
 		return $sql;
-
 	} // get_sql_string()
 
 	public function clear(){
@@ -667,6 +621,4 @@ db_type = mysql','html');
 		$this->set_table('');
 		$this->set_where('');
 	}
-
-
 }

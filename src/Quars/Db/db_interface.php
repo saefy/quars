@@ -28,21 +28,21 @@ interface db_interface{
 	 *@since v0.1 beta
 	 *@return bool & Populates $this->resource
 	 * */
-	public function query($query);
+	public function query($query, $params = []);
 	/**
 	 *@package db_interface
 	 *@method query_assoc()
 	 *@desc Send a SQL query in assoc mode
 	 *@since v0.1 beta
 	 * */
-	public function query_assoc($query);
+	public function query_assoc($query, $params = []);
 	/**
 	 *@package db_interface
 	 *@method query_array()
 	 *@desc Send a SQL query in array mode
 	 *@since v0.1 beta
 	 * */
-	public function query_array($query);
+	public function query_array($query, $params = []);
 	/**
 	 *@package db_interface
 	 *@method num_rows()

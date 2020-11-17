@@ -98,13 +98,13 @@ class Db{
 	 * @desc executes database query
 	 * @since v0.1 beta
 	 * */
-	public function query($query=NULL){
+	public function query($query=NULL, $params = []){
 
 		if($query==NULL){
 			$query = $this->db_obj->get_sql_string();
 		}
 
-		$rs = $this->db_obj->query($query);
+		$rs = $this->db_obj->query($query, $params);
 		$this->make_debug($query);
 		if($rs==FALSE){
 			$this->error_code = $this->db_obj->error_code;
@@ -119,13 +119,13 @@ class Db{
 	 * @desc executes query un assoc mode
 	 * @since v0.1 beta
 	 * */
-	public function query_assoc($query){
+	public function query_assoc($query, $params = []){
 		
 		if($query==NULL){
 			$query = $this->db_obj->get_sql_string();
 		}
 		
-		$this->db_obj->query_assoc($query);
+		$this->db_obj->query_assoc($query, $params);
 		$this->make_debug($query);
 		$this->sql_query=$this->db_obj->sql_query;
 		$this->resource=$this->db_obj->resource;
@@ -136,13 +136,13 @@ class Db{
 	 * @desc executes query un assoc mode
 	 * @since v0.1 beta
 	 * */
-	public function query_array($query){
+	public function query_array($query, $params = []){
 		
 		if($query==NULL){
 			$query = $this->db_obj->get_sql_string();
 		}
 		
-		$this->db_obj->query_array($query);
+		$this->db_obj->query_array($query, $params);
 		$this->make_debug($query);
 		$this->sql_query=$this->db_obj->sql_query;
 		$this->resource=$this->db_obj->resource;
@@ -365,9 +365,9 @@ class Db{
 	 * @desc executes database query and returns the records into an array
 	 * @since v0.1 beta
 	 * */
-	public function result($sql = NULL){
+	public function result($sql = NULL, $params = []){
 
-		$rs = $this->query($sql);
+		$rs = $this->query($sql, $params);
 		$this->sql_query=$this->db_obj->sql_query;
 
 		$records = array();
@@ -386,9 +386,9 @@ class Db{
 	 * @desc executes database query and returns the records into an array
 	 * @since v0.3.2
 	 * */
-	public function result_assoc($sql = NULL){
+	public function result_assoc($sql = NULL, $params = []){
 
-		$rs = $this->query_assoc($sql);
+		$rs = $this->query_assoc($sql, $params);
 		$this->sql_query=$this->db_obj->sql_query;
 
 		$records = array();
@@ -406,9 +406,9 @@ class Db{
 	 * @desc executes database query and returns the records into an array
 	 * @since v0.3.2
 	 * */
-	public function result_array($sql = NULL){
+	public function result_array($sql = NULL, $params = []){
 
-		$rs = $this->query_array($sql);
+		$rs = $this->query_array($sql, $params);
 		$this->sql_query=$this->db_obj->sql_query;
 
 		$records = array();
