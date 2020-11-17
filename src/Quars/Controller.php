@@ -363,10 +363,26 @@ class '.get_class($this).' extends Controller {
 	*@package Controller
 	*@method jsonResponse($response);
 	* */
-	public function jsonResponse($response) {
-		header('Content-Type: application/json');
-		echo json_encode($response);
-		return;
+	public function jsonResponse($Response, $Status = 'ok'){
+		switch ($Status) {
+			case 'ok': $httpStatusCode = 200; break;
+			case 'created': $httpStatusCode = 201; break;
+			case 'accepted': $httpStatusCode = 202; break;
+			case 'bad request': $httpStatusCode = 400; break;
+			case 'unauthorized': $httpStatusCode = 401; break;
+			case 'forbidden': $httpStatusCode = 403; break;
+			case 'not found': $httpStatusCode = 404; break;
+			case 'method not allowed': $httpStatusCode = 405; break;
+			case 'conflict': $httpStatusCode = 409; break;
+			case 'error': case 'internal server error': $httpStatusCode = 500; break;
+			case 'service unavailable': $httpStatusCode = 503; break;
+			default: $httpStatusCode = 200; break;
+		}
+		// Response
+		header("Content-Type: application/json");
+    	http_response_code($httpStatusCode);
+	    echo json_encode($Response);
+	    return ;
 	}
 
 }
