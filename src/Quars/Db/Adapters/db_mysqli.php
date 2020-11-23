@@ -272,7 +272,7 @@ db_type = mysql','html');
 	 * */
 	public function describe_table($table){
 		$t_fields = array();
-		$sql = ' DESC '.$table.';';
+		$sql = ' DESC `'.$table.'`;';
 		$this->query_assoc($sql);
 
 		while($rec = $this->next()){
@@ -592,7 +592,7 @@ db_type = mysql','html');
 	public function get_sql_string(){
 		$sql = ' SELECT ';
 		$sql .= ($this->sql_select_distinct!='') ? ' DISTINCT '.$this->sql_select_distinct : $this->sql_select;
-		$sql .= ' FROM '.$this->sql_table;
+		$sql .= ' FROM `'.$this->sql_table.'`';
 		if(trim($this->sql_where)!=''){
 			$sql .= ' WHERE ('.$this->sql_where.')';
 		}else{
