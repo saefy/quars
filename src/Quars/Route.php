@@ -13,7 +13,7 @@ use Phroute\Phroute\RouteCollector;
 Global $Router, $RouteMode;
 
 $Router = new RouteCollector();
-$RouteMode = 'ALL';
+$RouteMode = 'ROUTE'; // ROUTE | ALL
 
 class Route{
 	
