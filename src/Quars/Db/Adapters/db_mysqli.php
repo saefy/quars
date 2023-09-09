@@ -154,11 +154,14 @@ db_type = mysql','html');
 		// Replace tokens
 		if (count($params) > 0) {
 			$replaceTokens = function($str, $args = []){
-			global $db;
+			    global $db;
+                $offset = 0;
 				foreach ($args as $value) {
-					$pos = strpos($str, '?');
+					$pos = strpos($str, '?', $offset);
 					if ($pos === false) { break;}
-					$str = preg_replace('/\?/', $db->escape_string($value), $str, 1);
+                    $escapedStr = $db->escape_string($value);
+					$str = substr($str, 0,  $pos) . $escapedStr . substr($str, $pos + 1);
+                    $offset = $pos + strlen($escapedStr);
 				}
 				return $str;
 			};
