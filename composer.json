@@ -18,7 +18,7 @@
     ],
     "require": {
         "php": "~5.6|~7.0|~8.0",
-        "jenssegers/blade": "^1.1",
+        "jenssegers/blade": "^2.0",
         "phroute/phroute": "^2.1"
     },
     "require-dev": {
